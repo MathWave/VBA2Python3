@@ -1,0 +1,18 @@
+ID="{D9DCD082-30BE-7D4F-9087-5AF32D284251}"
+Document=ќтаЉнига/&H00000000
+Document=‹ист1/&H00000000
+Module=Module1
+Name="VBAProject"
+HelpContextID="0"
+VersionCompatible32="393222000"
+CMG="9193717775777577757775"
+DPB="6062804381438143"
+GC="2F2DCFC2515E215F215FDE"
+
+[Host Extender Info]
+&H00000001={3832D640-CF90-11CF-8E43-00A0C911005A};VBE;&H00000000
+
+[Workspace]
+ќтаЉнига=0, 0, 0, 0, C
+‹ист1=0, 0, 0, 0, C
+Module1=-4, -26, 1118, 684, 
