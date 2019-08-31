@@ -1,10 +1,10 @@
 import autopep8
 
-def MakeOperands(line):
+def MakeOperands(line): # перевод логических операций
     newline = line.replace(' And ', ' and ')\
         .replace(' Or ', ' or ')
     newl = ''
-    for i in range(len(newline)):
+    for i in range(len(newline)): # а тут исправляем <= и >=
         if newline[i] == '=':
             if newline[i-1] == '<' or newline[i-1] == '>' or newline[i+1] == '<' or newline[i+1] == '>':
                 newl += '='
@@ -19,12 +19,12 @@ def translate(filename):
         .replace(' Then', ':')\
         .replace('End If', '')\
         .replace('CStr', 'str')\
-        .split('\n')
+        .split('\n') # переводим некоторые функции, не требующие дополнительного вмешательства
     trans = open("trans.py", 'w')
 
     current = ""
 
-    for line in file:
+    for line in file: # тут простой перевод
         if line.__contains__('End Function'):
             trans.write('\n')
             current = ''
@@ -41,7 +41,7 @@ def translate(filename):
             kek = MakeOperands(line.replace("Else", 'else')) + ':' + '\n'
             trans.write(MakeOperands(line.replace("Else", 'else').replace(':', '')) + ':' + '\n')
         elif line.__contains__(current):
-            if line.__contains__('&'):
+            if line.__contains__('&'): # конкатинация строк
                 if current == 'GetHyperState':
                     line = line.replace('&', '+')
             if line.__contains__('Array'):
@@ -53,7 +53,7 @@ def translate(filename):
         else:
             trans.write(line + '\n')
     trans.close()
-    lll = autopep8.fix_file('trans.py')
+    lll = autopep8.fix_file('trans.py') # приводим код к pep8
     fff = open('transpep.py', 'w')
     fff.write(lll)
     fff.close()
