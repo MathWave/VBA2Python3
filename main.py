@@ -117,4 +117,21 @@ remove('newcur.py')
 nodes = set(connections.keys())
 
 print("\n\nThe way:")
-print(FindTheWay(connections))
+way = FindTheWay(connections)
+print(way)
+print('\nInstructions: ')
+current = [] # текущее положение в ячейках
+
+for i in range(info[0]):
+    current.append(0)
+for i in range(1, len(way)):
+    while True: # генерируем тестовый комплект
+        data = []
+        for j in more_info:
+            data.append(choice(j))
+        if IsPossible(*current, *data):
+            nextcurrent = NextCurrent(current, data)
+            if GetHyperState(*nextcurrent) == way[i]:
+                print(data)
+                current = nextcurrent
+                break
