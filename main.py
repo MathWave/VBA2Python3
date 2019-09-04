@@ -46,11 +46,20 @@ def FindTheWay(graph):
     if len(last_in_queue) == len(list(graph.keys())):
         return last_in_queue
     else:
-        other_tops = []
-        for top in graph.keys():
-            if top not in last_in_queue:
-                other_tops.append(top)
-        print(other_tops)
+        q = Queue()
+        q.put(last_in_queue)
+        while True:
+            last_in_queue = q.get()
+            last_top = last_in_queue[-1]
+            for top in graph.keys():
+                last_combo = last_in_queue.copy()
+                if top in graph[last_top]:
+                    last_combo.append(top)
+                    q.put(last_combo)
+            if set(last_in_queue) == set(graph.keys()):
+                return last_in_queue
+
+
 
 
 translate("code.txt") # переводим код, он записывается в transpep
@@ -107,4 +116,5 @@ remove('newcur.py')
 
 nodes = set(connections.keys())
 
+print("\n\nThe way:")
 print(FindTheWay(connections))
