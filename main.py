@@ -1,12 +1,57 @@
 from translate import translate
 from random import choice
 from os import remove
+from queue import *
+from anytree import Node, RenderTree
+
+def GenerateFile():
+    newcur = open('newcur.py', 'w')  # тут создаем файл с единственной функцией
+    funcs = open('transpep.py', 'r').read().split('\n')  # NextCurrent, которая возвращает следующее положение
+    func_list = []  # в ячейках
+    for line in funcs:
+        if line.__contains__('def') and line.__contains__('Next'):
+            func_list.append(line.split(' ')[1].split('(')[0])
+    newcur.write('from transpep import *\n\n')
+    newcur.write('def NextCurrent(current, data):\n')
+    newcur.write('\treturn [')
+    newcur.write(func_list[0] + '(*current, *data)')
+    for f in func_list[1:]:
+        newcur.write(', ' + f + '(*current, *data)')
+    newcur.write(']')
+    newcur.close()
+
 
 def PrintArr(arr): # вывод массива
     line = ''
     for i in arr:
         line += str(i) + ' '
     return line
+
+def FindTheWay(graph):
+    global info
+    q = Queue()
+    arr = []
+    for top in range(info[0]):
+        arr.append(0)
+    q.put([GetHyperState(*arr)])
+    last_in_queue = []
+    while not q.empty():
+        last_in_queue = q.get()
+        last_top = last_in_queue[-1]
+        for top in graph.keys():
+            last_combo = last_in_queue.copy()
+            if top in graph[last_top] and top not in last_in_queue:
+                last_combo.append(top)
+                q.put(last_combo)
+    if len(last_in_queue) == len(list(graph.keys())):
+        return last_in_queue
+    else:
+        other_tops = []
+        for top in graph.keys():
+            if top not in last_in_queue:
+                other_tops.append(top)
+        print(other_tops)
+
 
 translate("code.txt") # переводим код, он записывается в transpep
 
@@ -26,20 +71,8 @@ more_info = more_info[2:]
 
 res = open('results.csv', 'w')
 
-newcur = open('newcur.py', 'w')                                   # тут создаем файл с единственной функцией
-funcs = open('transpep.py', 'r').read().split('\n')               # NextCurrent, которая возвращает следующее положение
-func_list = []                                                    # в ячейках
-for line in funcs:
-    if line.__contains__('def') and line.__contains__('Next'):
-        func_list.append(line.split(' ')[1].split('(')[0])
-newcur.write('from transpep import *\n\n')
-newcur.write('def NextCurrent(current, data):\n')
-newcur.write('\treturn [')
-newcur.write(func_list[0] + '(*current, *data)')
-for f in func_list[1:]:
-    newcur.write(', ' + f + '(*current, *data)')
-newcur.write(']')
-newcur.close()
+GenerateFile()
+
 from newcur import NextCurrent
 
 connections = {}
@@ -51,7 +84,6 @@ for i in range(100000): # сколько тестов генерируем
             data.append(choice(j))
         if IsPossible(*current, *data):
             break
-    new_current = []
     nextcurrent = NextCurrent(current, data) # получаем следующее значение в ячейках
     if GetHyperState(*current) not in list(connections.keys()): # если позиция ячеек еще не встречалась, добавляем
         connections[GetHyperState(*current)] = []               # ее в словарь
@@ -62,7 +94,7 @@ for i in range(100000): # сколько тестов генерируем
     # выводим результат в консоль и записываем в csv
 
 for con in connections.keys():
-    connections[con] = list(set(connections[con]))
+    connections[con] = set(connections[con])
 
 print('\n\n\n')
 
@@ -72,3 +104,7 @@ res.close()
 remove('trans.py')        # удаляем сгенерированные файлы
 remove('transpep.py')
 remove('newcur.py')
+
+nodes = set(connections.keys())
+
+print(FindTheWay(connections))
