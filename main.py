@@ -120,18 +120,37 @@ print("\n\nThe way:")
 way = FindTheWay(connections)
 print(way)
 print('\nInstructions: ')
-current = [] # текущее положение в ячейках
 
-for i in range(info[0]):
-    current.append(0)
-for i in range(1, len(way)):
-    while True: # генерируем тестовый комплект
-        data = []
-        for j in more_info:
-            data.append(choice(j))
-        if IsPossible(*current, *data):
-            nextcurrent = NextCurrent(current, data)
-            if GetHyperState(*nextcurrent) == way[i]:
-                print(data)
-                current = nextcurrent
+stop = False
+stop_position = 10000
+
+while not stop:
+    current = []  # текущее положение в ячейках
+    answer = []
+    for i in range(info[0]):
+        current.append(0)
+    for i in range(1, len(way)):
+        count = 0
+        while True: # генерируем тестовый комплект
+            data = []
+            for j in more_info:
+                data.append(choice(j))
+            if IsPossible(*current, *data):
+                nextcurrent = NextCurrent(current, data)
+                if GetHyperState(*nextcurrent) == way[i]:
+                    answer.append(data)
+                    current = nextcurrent
+                    if len(way) == len(answer) + 1:
+                        stop = True
+                    break
+            else:
+                count += 1
+            if count == stop_position:
                 break
+        if count == stop_position:
+            break
+
+for i in answer:
+    print(i)
+
+print("HAPPYEND!!!!")
