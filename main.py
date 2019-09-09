@@ -43,6 +43,9 @@ def FindTheWay(graph):
             if top in graph[last_top] and top not in last_in_queue:
                 last_combo.append(top)
                 q.put(last_combo)
+                length = q.qsize()
+                if length % 100000 == 0:
+                    print("queue length: " + str(length))
     if len(last_in_queue) == len(list(graph.keys())):
         return last_in_queue
     else:
