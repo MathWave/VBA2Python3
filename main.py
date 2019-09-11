@@ -27,12 +27,18 @@ def PrintArr(arr): # вывод массива
         line += str(i) + ' '
     return line
 
-def FindTheWay(graph):
+
+def GetStartPosition():
     global info
-    q = Queue()
     arr = []
     for top in range(info[0]):
         arr.append(0)
+    return arr
+
+
+def FindNodeWay(graph):
+    arr = GetStartPosition()
+    q = Queue()
     q.put([GetHyperState(*arr)])
     last_in_queue = []
     while not q.empty():
@@ -61,6 +67,52 @@ def FindTheWay(graph):
                     q.put(last_combo)
             if set(last_in_queue) == set(graph.keys()):
                 return last_in_queue
+
+
+def GetCurrentConnection(way):
+    cons = []
+    for i in range(len(way) - 1):
+        cons.append([way[i], way[i + 1]])
+    return cons
+
+
+def FindConnectionWay(graph):
+    arr = GetStartPosition()
+    all_connections = []
+    for key in graph.keys():
+        for node in graph[key]:
+            all_connections.append([key, node])
+    q = Queue()
+    q.put([GetHyperState(*arr)])
+    last_in_queue = []
+    while not q.empty():
+        last_in_queue = q.get()
+        last_top = last_in_queue[-1]
+        current_cons = GetCurrentConnection(last_in_queue)
+        for top in graph.keys():
+            last_combo = last_in_queue.copy()
+            if top in graph[last_top] and [last_in_queue[-1], top] not in current_cons:
+                last_combo.append(top)
+                q.put(last_combo)
+                length = q.qsize()
+                if length % 100000 == 0:
+                    print("queue length: " + str(length))
+    if len(GetCurrentConnection(last_in_queue)) == len(all_connections):
+        return last_in_queue
+    else:
+        q = Queue()
+        q.put(last_in_queue)
+        while True:
+            last_in_queue = q.get()
+            last_top = last_in_queue[-1]
+            for top in graph.keys():
+                last_combo = last_in_queue.copy()
+                if top in graph[last_top]:
+                    last_combo.append(top)
+                    q.put(last_combo)
+            if set(GetCurrentConnection(last_in_queue)) == len(all_connections):
+                return last_in_queue
+    return all_connections
 
 
 
@@ -120,7 +172,7 @@ remove('newcur.py')
 nodes = set(connections.keys())
 
 print("\n\nThe way:")
-way = FindTheWay(connections)
+way = FindNodeWay(connections)
 print(way)
 print('\nInstructions: ')
 
@@ -128,10 +180,8 @@ stop = False
 stop_position = 10000
 
 while not stop:
-    current = []  # текущее положение в ячейках
+    current = GetStartPosition()  # текущее положение в ячейках
     answer = []
-    for i in range(info[0]):
-        current.append(0)
     for i in range(1, len(way)):
         count = 0
         while True: # генерируем тестовый комплект
@@ -155,5 +205,8 @@ while not stop:
 
 for i in answer:
     print(i)
+
+print('new: ')
+print(FindConnectionWay(connections))
 
 print("HAPPYEND!!!!")
