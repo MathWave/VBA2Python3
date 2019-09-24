@@ -4,7 +4,6 @@
     <list default="true" id="a5ffdf37-b41b-41ba-b4e7-12d389bcd9a2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/results.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -127,7 +126,10 @@
       <workItem from="1568033075537" duration="1273000" />
       <workItem from="1568093986072" duration="599000" />
       <workItem from="1568134659898" duration="2560000" />
-      <workItem from="1568197441472" duration="4866000" />
+      <workItem from="1568197441472" duration="5136000" />
+      <workItem from="1568219757501" duration="85000" />
+      <workItem from="1568699258868" duration="100000" />
+      <workItem from="1569303073063" duration="163000" />
     </task>
     <servers />
   </component>
@@ -149,6 +151,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/VBA2Python$translate.coverage" NAME="translate Coverage Results" MODIFIED="1567071211174" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/VBA2Python$main.coverage" NAME="main Coverage Results" MODIFIED="1568208871381" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/VBA2Python$main.coverage" NAME="main Coverage Results" MODIFIED="1569303355527" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
