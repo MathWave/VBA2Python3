@@ -2,7 +2,7 @@ from translate import translate
 from random import choice
 from os import remove
 from queue import *
-from anytree import Node, RenderTree
+from z3 import *
 
 def GenerateFile():
     newcur = open('newcur.py', 'w')  # тут создаем файл с единственной функцией
@@ -112,9 +112,58 @@ def FindConnectionWay(graph):
                     q.put(last_combo)
             if set(GetCurrentConnection(last_in_queue)) == len(all_connections):
                 return last_in_queue
-    return all_connections
+    #return all_connections
 
 
+def ReverseGraph(graph):
+    newgraph = {}
+    for i in graph.keys():
+        for j in graph[i]:
+            if j not in newgraph.keys():
+                newgraph[j] = [i]
+            else:
+                newgraph[j].append(i)
+    return newgraph
+
+
+def FindNodeWayZ3(graph):
+    intgraph = {}
+    cons = {}
+    arr = list(graph.keys())
+    for i in range(len(arr)):
+        cons[arr[i]] = i
+    for i in graph.keys():
+        ii = cons[i]
+        intgraph[ii] = []
+        for j in graph[i]:
+            intgraph[ii].append(cons[j]);
+    for i in range(len(graph.keys()), 1000):
+        s = Solver()
+        X = [Int('x%s' % i) for i in range(i)]
+        cond1 = [Or([X[j] == i for j in range(len(X))]) for i in intgraph.keys()]
+        print("condition 1 ready for " + str(i) + " position")
+        cond2 = [Or([And(X[i] == j, X[i + 1] == k) for j in intgraph.keys() for k in intgraph[j]]) for i in range(len(X) - 1)]
+        print("condition 2 ready for " + str(i) + " position")
+        cond3 = [X[0] == 0]
+        s.add(cond1 + cond2 + cond3)
+        if s.check() == sat:
+            #print('\n\nway:\n')
+            m = s.model()
+            model_str = str(s.model()).split(',\n ')
+            model_str[0] = model_str[0][1:len(model_str[0])]
+            model_str[-1] = model_str[-1][0:len(model_str[-1])-1]
+            row = {}
+            for i in range(len(model_str)):
+                #print(model_str[i])
+                new_arr = model_str[i].split(' ')
+                row[int(new_arr[0][1::])] = int(new_arr[2])
+            new_row = []
+            back_cons = {}
+            for i in cons.keys():
+                back_cons[cons[i]] = i
+            for i in range(len(row)):
+                new_row.append(back_cons[row[i]])
+            return new_row
 
 
 translate("code.txt") # переводим код, он записывается в transpep
@@ -171,9 +220,15 @@ remove('newcur.py')
 
 nodes = set(connections.keys())
 
+print("\n\nZ3:\n\n")
+print(FindNodeWayZ3(connections))
+
 print("\n\nThe way:")
 way = FindNodeWay(connections)
 print(way)
+
+'''
+
 print('\nInstructions: ')
 
 stop = False
@@ -210,3 +265,4 @@ print('new: ')
 print(FindConnectionWay(connections))
 
 print("HAPPYEND!!!!")
+'''
