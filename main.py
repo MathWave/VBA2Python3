@@ -4,6 +4,7 @@ from os import remove
 from queue import *
 from z3 import *
 
+
 def GenerateFile():
     newcur = open('newcur.py', 'w')  # тут создаем файл с единственной функцией
     funcs = open('transpep.py', 'r').read().split('\n')  # NextCurrent, которая возвращает следующее положение
@@ -76,6 +77,36 @@ def GetCurrentConnection(way):
     return cons
 
 
+def GetInstruction(way):
+    stop = False
+    stop_position = 10000
+
+    while not stop:
+        current = GetStartPosition()  # текущее положение в ячейках
+        answer = []
+        for i in range(1, len(way)):
+            count = 0
+            while True:  # генерируем тестовый комплект
+                data = []
+                for j in more_info:
+                    data.append(choice(j))
+                if IsPossible(*current, *data):
+                    nextcurrent = NextCurrent(current, data)
+                    if GetHyperState(*nextcurrent) == way[i]:
+                        answer.append(data)
+                        current = nextcurrent
+                        if len(way) == len(answer) + 1:
+                            stop = True
+                        break
+                else:
+                    count += 1
+                if count == stop_position:
+                    break
+            if count == stop_position:
+                break
+    return answer
+
+
 def FindConnectionWay(graph):
     arr = GetStartPosition()
     all_connections = []
@@ -115,35 +146,48 @@ def FindConnectionWay(graph):
     #return all_connections
 
 
-def ReverseGraph(graph):
-    newgraph = {}
-    for i in graph.keys():
-        for j in graph[i]:
-            if j not in newgraph.keys():
-                newgraph[j] = [i]
-            else:
-                newgraph[j].append(i)
-    return newgraph
-
-
-def FindNodeWayZ3(graph):
-    intgraph = {}
+def Coding(graph):
     cons = {}
     arr = list(graph.keys())
     for i in range(len(arr)):
         cons[arr[i]] = i
+    return cons
+
+
+def GetIntGraph(graph, cons):
+    intgraph = {}
     for i in graph.keys():
         ii = cons[i]
         intgraph[ii] = []
         for j in graph[i]:
-            intgraph[ii].append(cons[j]);
+            intgraph[ii].append(cons[j])
+    return intgraph
+
+
+def FindConnectionWayZ3(graph):
+    allconnections = []
+    cons = Coding(graph)
+    intgraph = GetIntGraph(graph, cons)
+    for i in intgraph.keys():
+        for j in intgraph[i]:
+            allconnections.append([i, j])
+    for i in range(len(graph.keys()), 1000):
+        s = Solver()
+        X = [Int('x%s' % i) for i in range(i)]
+        
+
+
+def FindNodeWayZ3(graph):
+    cons = Coding(graph)
+    intgraph = GetIntGraph(graph, cons)
     for i in range(len(graph.keys()), 1000):
         s = Solver()
         X = [Int('x%s' % i) for i in range(i)]
         cond1 = [Or([X[j] == i for j in range(len(X))]) for i in intgraph.keys()]
-        print("condition 1 ready for " + str(i) + " position")
-        cond2 = [Or([And(X[i] == j, X[i + 1] == k) for j in intgraph.keys() for k in intgraph[j]]) for i in range(len(X) - 1)]
-        print("condition 2 ready for " + str(i) + " position")
+                                                                                                                        #print("condition 1 ready for " + str(i) + " position")
+        cond2 = [Or([And(X[i] == j, X[i + 1] == k)
+                     for j in intgraph.keys() for k in intgraph[j]]) for i in range(len(X) - 1)]
+                                                                                                                        #print("condition 2 ready for " + str(i) + " position")
         cond3 = [X[0] == 0]
         s.add(cond1 + cond2 + cond3)
         if s.check() == sat:
@@ -166,16 +210,37 @@ def FindNodeWayZ3(graph):
             return new_row
 
 
+def BuildGraph(n):
+    current = []  # текущее положение в ячейках
+    for i in range(info[0]):
+        current.append(0)
+    connections = {}
+
+    for i in range(n):  # сколько тестов генерируем
+        while True:  # генерируем тестовый комплект
+            data = []
+            for j in more_info:
+                data.append(choice(j))
+            if IsPossible(*current, *data):
+                break
+        nextcurrent = NextCurrent(current, data)  # получаем следующее значение в ячейках
+        if GetHyperState(*current) not in list(connections.keys()):  # если позиция ячеек еще не встречалась, добавляем
+            connections[GetHyperState(*current)] = []  # ее в словарь
+        connections[GetHyperState(*current)].append(GetHyperState(*nextcurrent))  # добавляем связь
+        current = nextcurrent
+        print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + GetHyperState(*current) + '\t\t' + PrintArr(current))
+        res.write('"' + str(i + 1) + '";"' + PrintArr(data) + '";"' + GetHyperState(*current) + '";"' + PrintArr(
+            current) + '"\n')
+        # выводим результат в консоль и записываем в csv
+    return connections
+
+
 translate("code.txt") # переводим код, он записывается в transpep
 
 import transpep
 from transpep import * # импортируем файл
 
 info = GetInfo() # информация по обрабатываемым функциям
-current = [] # текущее положение в ячейках
-
-for i in range(info[0]):
-    current.append(0)
 
 more_info = []
 for i in range(info[1] + 2):
@@ -188,23 +253,7 @@ GenerateFile()
 
 from newcur import NextCurrent
 
-connections = {}
-
-for i in range(100000): # сколько тестов генерируем
-    while True: # генерируем тестовый комплект
-        data = []
-        for j in more_info:
-            data.append(choice(j))
-        if IsPossible(*current, *data):
-            break
-    nextcurrent = NextCurrent(current, data) # получаем следующее значение в ячейках
-    if GetHyperState(*current) not in list(connections.keys()): # если позиция ячеек еще не встречалась, добавляем
-        connections[GetHyperState(*current)] = []               # ее в словарь
-    connections[GetHyperState(*current)].append(GetHyperState(*nextcurrent)) # добавляем связь
-    current = nextcurrent
-    print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + GetHyperState(*current) + '\t\t' + PrintArr(current))
-    res.write('"' + str(i + 1) + '";"' + PrintArr(data) + '";"' + GetHyperState(*current) + '";"' + PrintArr(current) + '"\n')
-    # выводим результат в консоль и записываем в csv
+connections = BuildGraph(100000)
 
 for con in connections.keys():
     connections[con] = set(connections[con])
@@ -220,49 +269,21 @@ remove('newcur.py')
 
 nodes = set(connections.keys())
 
-print("\n\nZ3:\n\n")
+print("\n\nZ3:")
 print(FindNodeWayZ3(connections))
 
 print("\n\nThe way:")
 way = FindNodeWay(connections)
 print(way)
 
-'''
 
 print('\nInstructions: ')
 
-stop = False
-stop_position = 10000
-
-while not stop:
-    current = GetStartPosition()  # текущее положение в ячейках
-    answer = []
-    for i in range(1, len(way)):
-        count = 0
-        while True: # генерируем тестовый комплект
-            data = []
-            for j in more_info:
-                data.append(choice(j))
-            if IsPossible(*current, *data):
-                nextcurrent = NextCurrent(current, data)
-                if GetHyperState(*nextcurrent) == way[i]:
-                    answer.append(data)
-                    current = nextcurrent
-                    if len(way) == len(answer) + 1:
-                        stop = True
-                    break
-            else:
-                count += 1
-            if count == stop_position:
-                break
-        if count == stop_position:
-            break
+answer = GetInstruction(way)
 
 for i in answer:
     print(i)
 
-print('new: ')
-print(FindConnectionWay(connections))
+#print(FindConnectionWay(connections))
 
 print("HAPPYEND!!!!")
-'''
