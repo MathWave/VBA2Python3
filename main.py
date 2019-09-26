@@ -3,6 +3,24 @@ from random import choice
 from os import remove
 from queue import *
 from z3 import *
+from threading import Thread
+
+
+class CalcNodeFirst(Thread):
+
+    def __init__(self, count, X, intgraph):
+        super().__init__()
+        self.count = count
+        self.X = X
+        self.condition = []
+        self.intgraph = intgraph
+
+    def run(self):
+        self.condition = [Or([And(self.X[self.count] == j, self.X[self.count + 1] == k)
+                     for j in self.intgraph.keys() for k in self.intgraph[j]])]
+
+    def start(self):
+        self.run()
 
 
 def GenerateFile():
@@ -164,19 +182,6 @@ def GetIntGraph(graph, cons):
     return intgraph
 
 
-def FindConnectionWayZ3(graph):
-    allconnections = []
-    cons = Coding(graph)
-    intgraph = GetIntGraph(graph, cons)
-    for i in intgraph.keys():
-        for j in intgraph[i]:
-            allconnections.append([i, j])
-    for i in range(len(graph.keys()), 1000):
-        s = Solver()
-        X = [Int('x%s' % i) for i in range(i)]
-        
-
-
 def FindNodeWayZ3(graph):
     cons = Coding(graph)
     intgraph = GetIntGraph(graph, cons)
@@ -184,9 +189,22 @@ def FindNodeWayZ3(graph):
         s = Solver()
         X = [Int('x%s' % i) for i in range(i)]
         cond1 = [Or([X[j] == i for j in range(len(X))]) for i in intgraph.keys()]
-                                                                                                                        #print("condition 1 ready for " + str(i) + " position")
-        cond2 = [Or([And(X[i] == j, X[i + 1] == k)
-                     for j in intgraph.keys() for k in intgraph[j]]) for i in range(len(X) - 1)]
+        cond2 = []
+        threads = []
+        for j in range(len(X) - 1):
+            threads.append(CalcNodeFirst(j, X, intgraph))
+        for thread in threads:
+            thread.start()
+        while True:
+            stop = False
+            for i in threads:
+                stop += i.is_alive()
+            if not stop:
+                break
+        for j in threads:
+            cond2 += j.condition
+        #cond2 = [Or([And(X[i] == j, X[i + 1] == k)
+        #             for j in intgraph.keys() for k in intgraph[j]]) for i in range(len(X) - 1)]
                                                                                                                         #print("condition 2 ready for " + str(i) + " position")
         cond3 = [X[0] == 0]
         s.add(cond1 + cond2 + cond3)
@@ -199,6 +217,39 @@ def FindNodeWayZ3(graph):
             row = {}
             for i in range(len(model_str)):
                 #print(model_str[i])
+                new_arr = model_str[i].split(' ')
+                row[int(new_arr[0][1::])] = int(new_arr[2])
+            new_row = []
+            back_cons = {}
+            for i in cons.keys():
+                back_cons[cons[i]] = i
+            for i in range(len(row)):
+                new_row.append(back_cons[row[i]])
+            return new_row
+
+
+def FindConnectionWayZ3(graph):
+    allconnections = []
+    cons = Coding(graph)
+    intgraph = GetIntGraph(graph, cons)
+    for i in intgraph.keys():
+        for j in intgraph[i]:
+            allconnections.append([i, j])
+    for i in range(len(graph.keys()), 1000):
+        s = Solver()
+        X = [Int('x%s' % j) for j in range(i)]
+        cond1 = [Or([And(X[k] == i[0], X[k + 1] == i[1]) for k in range(len(X) - 1)]) for i in allconnections]
+        cond2 = [X[0] == 0]
+        s.add(cond1 + cond2)
+        if s.check() == sat:
+            # print('\n\nway:\n')
+            m = s.model()
+            model_str = str(s.model()).split(',\n ')
+            model_str[0] = model_str[0][1:len(model_str[0])]
+            model_str[-1] = model_str[-1][0:len(model_str[-1]) - 1]
+            row = {}
+            for i in range(len(model_str)):
+                # print(model_str[i])
                 new_arr = model_str[i].split(' ')
                 row[int(new_arr[0][1::])] = int(new_arr[2])
             new_row = []
@@ -284,6 +335,12 @@ answer = GetInstruction(way)
 for i in answer:
     print(i)
 
+'''
+print('\n\nEuler:\n\n')
+ans = FindConnectionWayZ3(connections)
+for i in ans:
+    print(i)
+'''
 #print(FindConnectionWay(connections))
 
 print("HAPPYEND!!!!")
