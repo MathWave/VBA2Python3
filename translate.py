@@ -14,14 +14,45 @@ def MakeOperands(line): # перевод логических операций
             newl += newline[i]
     return newl.replace('<>', '!=')
 
+
+def __solveBracketsInArray__(line):
+    conflicts = []
+    i = 0
+    newline = ''
+    while i < len(line):
+        if line[i:i+5] == 'Array':
+            newline += '['
+            i += 6
+            conflicts.append(1)
+            continue
+        if line[i] == '(':
+            conflicts[-1] += 1
+            newline += '('
+        elif line[i] == ')':
+            conflicts[-1] -= 1
+            if conflicts[-1] == 0:
+                newline += ']'
+                conflicts.pop(-1)
+            else:
+                newline += ')'
+        else:
+            newline += line[i]
+        i += 1
+    return newline
+
+
+
 def translate(filename):
     file = open(filename, 'r').read()\
         .replace(' Then', ':')\
         .replace('End If', '')\
         .replace('CStr', 'str')\
-        .split('\n') # переводим некоторые функции, не требующие дополнительного вмешательства
-    trans = open("trans.py", 'w')
+        .replace(' Mod ', ' % ')
 
+    trans = open("trans.py", 'w')
+    if file.__contains__('Rnd'):
+        trans.write("from random import randrange\n\n")
+    file = file.replace('Rnd', 'randrange').split('\n') # переводим некоторые функции, не требующие дополнительного вмешательства
     current = ""
 
     for line in file: # тут простой перевод
@@ -45,7 +76,7 @@ def translate(filename):
                 if current == 'GetHyperState':
                     line = line.replace('&', '+')
             if line.__contains__('Array'):
-                line = line.replace('Array(', '[').replace(')', ']')
+                line = __solveBracketsInArray__(line)
             trans.write(line.replace(current + ' =', 'return') + '\n')
         elif line.__contains__('&'):
             if current == 'GetHyperState':

@@ -23,6 +23,22 @@ class CalcNodeFirst(Thread):
         self.run()
 
 
+class CalcEilerFirst(Thread):
+
+    def __init__(self, count, X, intgraph):
+        super().__init__()
+        self.count = count
+        self.X = X
+        self.condition = []
+        self.intgraph = intgraph
+
+    def run(self):
+        self.condition = [Or([And(self.X[k] == self.count[0], self.X[k + 1] == self.count[1]) for k in range(len(self.X) - 1)])]
+
+    def start(self):
+        self.run()
+
+
 def GenerateFile():
     newcur = open('newcur.py', 'w')  # тут создаем файл с единственной функцией
     funcs = open('transpep.py', 'r').read().split('\n')  # NextCurrent, которая возвращает следующее положение
@@ -45,14 +61,6 @@ def PrintArr(arr): # вывод массива
     for i in arr:
         line += str(i) + ' '
     return line
-
-
-def GetStartPosition():
-    global info
-    arr = []
-    for top in range(info[0]):
-        arr.append(0)
-    return arr
 
 
 def FindNodeWay(graph):
@@ -190,6 +198,7 @@ def FindNodeWayZ3(graph):
         X = [Int('x%s' % i) for i in range(i)]
         cond1 = [Or([X[j] == i for j in range(len(X))]) for i in intgraph.keys()]
         cond2 = []
+        #'''
         threads = []
         for j in range(len(X) - 1):
             threads.append(CalcNodeFirst(j, X, intgraph))
@@ -203,11 +212,14 @@ def FindNodeWayZ3(graph):
                 break
         for j in threads:
             cond2 += j.condition
-        #cond2 = [Or([And(X[i] == j, X[i + 1] == k)
-        #             for j in intgraph.keys() for k in intgraph[j]]) for i in range(len(X) - 1)]
-                                                                                                                        #print("condition 2 ready for " + str(i) + " position")
+        #'''
+        '''
+        cond2 = [Or([And(X[i] == j, X[i + 1] == k)
+                     for j in intgraph.keys() for k in intgraph[j]]) for i in range(len(X) - 1)]
+        '''                                                                                                             #print("condition 2 ready for " + str(i) + " position")
         cond3 = [X[0] == 0]
         s.add(cond1 + cond2 + cond3)
+        #print("for " + str(i) + " checked")
         if s.check() == sat:
             #print('\n\nway:\n')
             m = s.model()
@@ -238,8 +250,22 @@ def FindConnectionWayZ3(graph):
     for i in range(len(graph.keys()), 1000):
         s = Solver()
         X = [Int('x%s' % j) for j in range(i)]
-        cond1 = [Or([And(X[k] == i[0], X[k + 1] == i[1]) for k in range(len(X) - 1)]) for i in allconnections]
-        cond2 = [X[0] == 0]
+        cond1 = [X[0] == 0]
+        cond2 = []
+        threads = []
+        for j in allconnections:
+            threads.append(CalcEilerFirst(j, X, intgraph))
+        for thread in threads:
+            thread.start()
+        while True:
+            stop = False
+            for t in threads:
+                stop += t.is_alive()
+            if not stop:
+                break
+        for j in threads:
+            cond2 += j.condition
+        print("thread for " + str(i) + " created")
         s.add(cond1 + cond2)
         if s.check() == sat:
             # print('\n\nway:\n')
@@ -263,8 +289,8 @@ def FindConnectionWayZ3(graph):
 
 def BuildGraph(n):
     current = []  # текущее положение в ячейках
-    for i in range(info[0]):
-        current.append(0)
+    from random import choice
+    current = GetStartPosition()
     connections = {}
 
     for i in range(n):  # сколько тестов генерируем
@@ -283,6 +309,8 @@ def BuildGraph(n):
         res.write('"' + str(i + 1) + '";"' + PrintArr(data) + '";"' + GetHyperState(*current) + '";"' + PrintArr(
             current) + '"\n')
         # выводим результат в консоль и записываем в csv
+        if StopCondition(*current):
+            current = GetStartPosition()
     return connections
 
 
@@ -309,6 +337,7 @@ connections = BuildGraph(100000)
 for con in connections.keys():
     connections[con] = set(connections[con])
 
+print("\n\namount: " + str(len(connections)))
 print('\n\n\n')
 
 for con in connections.keys():                       # выводим ребра графа в консоль
@@ -320,13 +349,15 @@ remove('newcur.py')
 
 nodes = set(connections.keys())
 
-print("\n\nZ3:")
-print(FindNodeWayZ3(connections))
-
-print("\n\nThe way:")
+print("\n\nNode way with Z3:")
 way = FindNodeWay(connections)
 print(way)
 
+'''
+print("\n\nThe way:")
+way = FindNodeWay(connections)
+print(way)
+'''
 
 print('\nInstructions: ')
 
