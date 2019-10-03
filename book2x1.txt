@@ -91,6 +91,14 @@ Function IsPossible(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_V
         IsPossible = True
 End Function
 
+Function GetStartPosition()
+    GetStartPosition = Array(0,0,0,0)
+End Function
+
+Function StopCondition(first, second, third, forth)
+    StopCondition = False
+End Function
+
 Function GetInfo()
     GetInfo = Array(4, 3, Array("Buy", "Sell"), Array(101), Array(1, 2, 3, 4, 5, 6, 7, 8, 9))
 End Function

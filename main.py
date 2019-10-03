@@ -3,40 +3,7 @@ from random import choice
 from os import remove
 from queue import *
 from z3 import *
-from threading import Thread
-
-
-class CalcNodeFirst(Thread):
-
-    def __init__(self, count, X, intgraph):
-        super().__init__()
-        self.count = count
-        self.X = X
-        self.condition = []
-        self.intgraph = intgraph
-
-    def run(self):
-        self.condition = [Or([And(self.X[self.count] == j, self.X[self.count + 1] == k)
-                     for j in self.intgraph.keys() for k in self.intgraph[j]])]
-
-    def start(self):
-        self.run()
-
-
-class CalcEilerFirst(Thread):
-
-    def __init__(self, count, X, intgraph):
-        super().__init__()
-        self.count = count
-        self.X = X
-        self.condition = []
-        self.intgraph = intgraph
-
-    def run(self):
-        self.condition = [Or([And(self.X[k] == self.count[0], self.X[k + 1] == self.count[1]) for k in range(len(self.X) - 1)])]
-
-    def start(self):
-        self.run()
+from Threading import *
 
 
 def GenerateFile():
@@ -289,7 +256,6 @@ def FindConnectionWayZ3(graph):
 
 def BuildGraph(n):
     current = []  # текущее положение в ячейках
-    from random import choice
     current = GetStartPosition()
     connections = {}
 
@@ -350,7 +316,7 @@ remove('newcur.py')
 nodes = set(connections.keys())
 
 print("\n\nNode way with Z3:")
-way = FindNodeWay(connections)
+way = FindNodeWayZ3(connections)
 print(way)
 
 '''

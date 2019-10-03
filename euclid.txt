@@ -23,7 +23,7 @@ Function GetInfo()
 End Function
 
 Function StopCondition(first, second)
-    If first = 0 Or second = 0 Then
+    If first <= 1 Or second <= 1 Then
         return True
     Else
         return False
@@ -39,5 +39,5 @@ Function GetHyperState(first, second)
 End Function
 
 Function GetStartPosition()
-    GetStartPosition = Array(Rnd(1000), Rnd(1000))
+    GetStartPosition = Array(Rnd(1000000), Rnd(1000000))
 End Function
