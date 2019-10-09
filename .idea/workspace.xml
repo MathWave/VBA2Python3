@@ -2,22 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a5ffdf37-b41b-41ba-b4e7-12d389bcd9a2" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Threading.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/res.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tryz3.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/lib/python3.7/site-packages/BitVector-3.4.9-py3.7.egg-info/PKG-INFO" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/lib/python3.7/site-packages/BitVector-3.4.9-py3.7.egg-info/SOURCES.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/lib/python3.7/site-packages/BitVector-3.4.9-py3.7.egg-info/dependency_links.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/lib/python3.7/site-packages/BitVector-3.4.9-py3.7.egg-info/installed-files.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/lib/python3.7/site-packages/BitVector-3.4.9-py3.7.egg-info/top_level.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/lib/python3.7/site-packages/BitVector/BitVector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/lib/python3.7/site-packages/BitVector/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Z3Translator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/book2x1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/book2x1.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/euclid.txt" beforeDir="false" afterPath="$PROJECT_DIR$/euclid.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/book3x2.txt" beforeDir="false" afterPath="$PROJECT_DIR$/book3x2.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/results.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tryz3.py" beforeDir="false" afterPath="$PROJECT_DIR$/tryz3.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,7 +49,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.tryz3">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="VBA2Python" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -128,8 +118,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.tryz3" />
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.translate" />
       </list>
     </recent_temporary>
@@ -179,7 +169,10 @@
       <workItem from="1570009122096" duration="5509000" />
       <workItem from="1570027555000" duration="1813000" />
       <workItem from="1570099295762" duration="3372000" />
-      <workItem from="1570116877597" duration="1637000" />
+      <workItem from="1570116877597" duration="6874000" />
+      <workItem from="1570207841919" duration="768000" />
+      <workItem from="1570209608135" duration="5303000" />
+      <workItem from="1570427198336" duration="13882000" />
     </task>
     <servers />
   </component>
@@ -208,26 +201,16 @@
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tryz3.py</url>
-          <line>47</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tryz3.py</url>
-          <line>13</line>
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/main.py</url>
-          <line>73</line>
-          <option name="timeStamp" value="17" />
+          <url>file://$PROJECT_DIR$/Z3Translator.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/VBA2Python$translate.coverage" NAME="translate Coverage Results" MODIFIED="1567071211174" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/VBA2Python$tryz3.coverage" NAME="tryz3 Coverage Results" MODIFIED="1570102493554" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/VBA2Python$main.coverage" NAME="main Coverage Results" MODIFIED="1570123229482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/VBA2Python$tryz3.coverage" NAME="tryz3 Coverage Results" MODIFIED="1570628254070" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/VBA2Python$main.coverage" NAME="main Coverage Results" MODIFIED="1570627835093" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

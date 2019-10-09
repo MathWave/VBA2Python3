@@ -4,6 +4,18 @@ from os import remove
 from queue import *
 from z3 import *
 from Threading import *
+from Z3Translator import *
+
+
+def FromArrIntoString(arr):
+    line = ""
+    for i in arr:
+        line += str(i) + " "
+    return line[0:len(line) - 1]
+
+
+def FromLineIntoArr(line):
+    return line.split(' ')
 
 
 def GenerateFile():
@@ -280,6 +292,29 @@ def BuildGraph(n):
     return connections
 
 
+def BuildIntGraph(n):
+    current = []  # текущее положение в ячейках
+    current = GetStartPosition()
+    connections = {}
+
+    for i in range(n):  # сколько тестов генерируем
+        while True:  # генерируем тестовый комплект
+            data = []
+            for j in more_info:
+                data.append(choice(j))
+            if IsPossible(*current, *data):
+                break
+        nextcurrent = NextCurrent(current, data)  # получаем следующее значение в ячейках
+        if FromArrIntoString(current) not in list(connections.keys()):  # если позиция ячеек еще не встречалась, добавляем
+            connections[FromArrIntoString(current)] = []  # ее в словарь
+        connections[FromArrIntoString(current)].append(FromArrIntoString(nextcurrent))  # добавляем связь
+        current = nextcurrent
+        print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + FromArrIntoString(current) + '\t\t')
+        # выводим результат в консоль и записываем в csv
+        if StopCondition(*current):
+            current = GetStartPosition()
+    return connections
+
 translate("code.txt") # переводим код, он записывается в transpep
 
 import transpep
@@ -298,10 +333,17 @@ GenerateFile()
 
 from newcur import NextCurrent
 
+#graph = BuildIntGraph(100000)
+
+#for con in graph.keys():
+#    graph[con] = list(set(graph[con]))
+
+
 connections = BuildGraph(100000)
 
 for con in connections.keys():
     connections[con] = set(connections[con])
+
 
 print("\n\namount: " + str(len(connections)))
 print('\n\n\n')
@@ -309,14 +351,16 @@ print('\n\n\n')
 for con in connections.keys():                       # выводим ребра графа в консоль
     print(str(con) + ": " + str(connections[con]))
 res.close()
-remove('trans.py')        # удаляем сгенерированные файлы
-remove('transpep.py')
-remove('newcur.py')
+#remove('trans.py')        # удаляем сгенерированные файлы
+#remove('transpep.py')
+#remove('newcur.py')
+
+create_z3()
 
 nodes = set(connections.keys())
 
 print("\n\nNode way with Z3:")
-way = FindNodeWayZ3(connections)
+way = FindNodeWay(connections)
 print(way)
 
 '''
@@ -332,8 +376,10 @@ answer = GetInstruction(way)
 for i in answer:
     print(i)
 
-'''
 print('\n\nEuler:\n\n')
+
+'''
+
 ans = FindConnectionWayZ3(connections)
 for i in ans:
     print(i)
@@ -341,3 +387,30 @@ for i in ans:
 #print(FindConnectionWay(connections))
 
 print("HAPPYEND!!!!")
+
+
+
+
+
+
+'''
+def UpdateGraph(graph):
+    func_params = []
+    for i in range(info[0]):
+        func_params.append(IntSort())
+    for i in range(2, info[1] + 2):
+        if type(info[i][0]) is int:
+            func_params.append(IntSort())
+        else:
+            func_params.append(StringSort())
+    hyperstate_z3 = Function('hyperstate_z3', *func_params, StringSort())
+    for node in graph.keys():
+        for other_node in graph.keys():
+            if node != other_node:
+                start = String('start')
+                cond1 = [start == node]
+                end = String('end')
+                cond2 = [end == other_node]
+
+    print(func_params)
+'''
