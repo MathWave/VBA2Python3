@@ -10,7 +10,7 @@ graph = {
 }
 
 def HS(s):
-    return 
+    return
 
 def func_z3(n):
     return If(n < 10, StringVal("less"), StringVal("more"))

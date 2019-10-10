@@ -8,7 +8,7 @@ def create_z3():
     recursion_level = 0
     for line in original:
         if line.__contains__('def'):
-            z3_funcs.write(line)
+            z3_funcs.write('\n\n' + line)
             def_list.append(line.split(' ')[1].split('(')[0])
             buffer = "\treturn "
         elif line.__contains__('if'):
@@ -18,17 +18,29 @@ def create_z3():
         elif line.__contains__('else'):
             recursion_level -= 1
             there_was_if_before = False
-            pass
         elif line.__contains__('return'):
             buffer += line.split('return')[1].strip()
             if there_was_if_before:
-                buffer+= ', '
+                buffer += ', '
             else:
-                buffer += ')'
+                buffer += '), '
             if recursion_level == 0:
-                z3_funcs.write(buffer)
+                newbuf = buffer[0:len(buffer) - 2]
+                left = 0
+                right = 0
+                for i in newbuf:
+                    if i == '(':
+                        left += 1
+                    elif i == ')':
+                        right += 1
+                for i in range(left - right):
+                    newbuf += ')'
+                z3_funcs.write(newbuf)
                 buffer = "\treturn "
 
 
     print(def_list)
     z3_funcs.close()
+
+
+create_z3()
