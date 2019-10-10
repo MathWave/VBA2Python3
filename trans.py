@@ -1,9 +1,9 @@
 def NextBid2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
 
-    if ((Order_Type == "Buy") and (Bid_1 > 0) and (Bid_2 == 0)):
+    if Order_Type == "Buy" and Bid_1 > 0 and Bid_2 == 0:
         return Order_Volume
     else:
-        if ((Order_Type == "Sell") and (Order_Volume >= Bid_1)):
+        if Order_Type == "Sell" and Order_Volume >= Bid_1:
             return 0
         else:
             return Bid_2
@@ -14,13 +14,13 @@ def NextBid2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
 
 def NextBid1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
   
-    if (Order_Type == "Buy") and (Bid_1 == 0) and (Order_Volume >= Ask_1 + Ask_2):
+    if Order_Type == "Buy" and Bid_1 == 0 and Order_Volume >= Ask_1 + Ask_2:
         return Order_Volume - Ask_1 - Ask_2
-    elif ((Order_Type == "Sell") and (Bid_1 > 0) and (Order_Volume < Bid_1)):
+    elif Order_Type == "Sell" and Bid_1 > 0 and Order_Volume < Bid_1:
         return Bid_1 - Order_Volume
-    elif ((Order_Type == "Sell") and (Bid_1 > 0) and (Order_Volume < Bid_1 + Bid_2)):
+    elif Order_Type == "Sell" and Bid_1 > 0 and Order_Volume < Bid_1 + Bid_2:
         return Bid_1 + Bid_2 - Order_Volume
-    elif ((Order_Type == "Sell") and (Bid_1 > 0) and (Order_Volume >= Bid_1 + Bid_2)):
+    elif Order_Type == "Sell" and Bid_1 > 0 and Order_Volume >= Bid_1 + Bid_2:
         return 0
     else:
         return Bid_1
@@ -30,16 +30,16 @@ def NextBid1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
 
 def NextAsk1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
     
-    if (Order_Type == "Sell") and (Ask_1 == 0) and (Order_Volume >= Bid_1 + Bid_2):
+    if Order_Type == "Sell" and Ask_1 == 0 and Order_Volume >= Bid_1 + Bid_2:
         return Order_Volume - Bid_1 - Bid_2
     else:
-        if (Order_Type == "Buy") and (Ask_1 > 0) and (Order_Volume < Ask_1):
+        if Order_Type == "Buy" and Ask_1 > 0 and Order_Volume < Ask_1:
             return Ask_1 - Order_Volume
         else:
-            if ((Order_Type == "Buy") and (Ask_1 > 0) and (Order_Volume < Ask_1 + Ask_2)):
+            if Order_Type == "Buy" and Ask_1 > 0 and Order_Volume < Ask_1 + Ask_2:
                 return Ask_1 + Ask_2 - Order_Volume
             else:
-                if ((Order_Type == "Buy") and (Ask_1 > 0) and (Order_Volume >= Ask_1 + Ask_2)):
+                if Order_Type == "Buy" and Ask_1 > 0 and Order_Volume >= Ask_1 + Ask_2:
                     return 0
                 else:
                     return Ask_1
@@ -52,10 +52,10 @@ def NextAsk1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
 
 def NextAsk2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
 
-    if ((Order_Type == "Sell") and (Ask_1 > 0) and (Ask_2 == 0)):
+    if Order_Type == "Sell" and Ask_1 > 0 and Ask_2 == 0:
         return Order_Volume
     else:
-        if ((Order_Type == "Buy") and (Order_Volume >= Ask_1)):
+        if Order_Type == "Buy" and Order_Volume >= Ask_1:
             return 0
         else:
             return Ask_2

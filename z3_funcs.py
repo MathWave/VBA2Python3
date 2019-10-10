@@ -2,8 +2,32 @@ from z3 import *
 
 
 
-def Next(a, b):
-	return If(a < b, 1, 0)
+def NextBid2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
+	return If(Order_Type == "Buy" and Bid_1 > 0 and Bid_2 == 0, Order_Volume, If(Order_Type == "Sell" and Order_Volume >= Bid_1, 0, Bid_2))
 
-def Add(a, b, c):
-	return If(a < b, 2, If(b < c, 1, 0))
+def NextBid1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
+	return If(Order_Type == "Buy" and Bid_1 == 0 and Order_Volume >= Ask_1 + Ask_2, Order_Volume - Ask_1 - Ask_2, If(Order_Type == "Sell" and Bid_1 > 0 and Order_Volume < Bid_1, Bid_1 - Order_Volume, If(Order_Type == "Sell" and Bid_1 > 0 and Order_Volume < Bid_1 + Bid_2, Bid_1 + Bid_2 - Order_Volume, If(Order_Type == "Sell" and Bid_1 > 0 and Order_Volume >= Bid_1 + Bid_2, 0, Bid_1))))
+
+def NextAsk1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
+	return If(Order_Type == "Sell" and Ask_1 == 0 and Order_Volume >= Bid_1 + Bid_2, Order_Volume - Bid_1 - Bid_2, If(Order_Type == "Buy" and Ask_1 > 0 and Order_Volume < Ask_1, Ask_1 - Order_Volume, If(Order_Type == "Buy" and Ask_1 > 0 and Order_Volume < Ask_1 + Ask_2, Ask_1 + Ask_2 - Order_Volume, If(Order_Type == "Buy" and Ask_1 > 0 and Order_Volume >= Ask_1 + Ask_2, 0, Ask_1))))
+
+def NextAsk2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
+	return If(Order_Type == "Sell" and Ask_1 > 0 and Ask_2 == 0, Order_Volume, If(Order_Type == "Buy" and Order_Volume >= Ask_1, 0, Ask_2))
+
+def HSymb(x):
+	return If(x <= 1, str(x), "M")
+
+def GetHyperState(X1, X2, X3, X4):
+	return HSymb(X1) + HSymb(X2) + "|" + HSymb(X3) + HSymb(X4)
+
+def IsPossible(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
+	return If(Bid_2 != 0 and Order_Type == "Buy" or Ask_2 != 0 and Order_Type == "Sell", False, True)
+
+def GetStartPosition():
+	return [0, 0, 0, 0]
+
+def StopCondition(first, second, third, forth):
+	return False
+
+def GetInfo():
+	return [4, 3, ["Buy", "Sell"], [101], [1, 2, 3, 4, 5, 6, 7, 8, 9]]

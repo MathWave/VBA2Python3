@@ -1,9 +1,9 @@
 Function NextBid2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume)
 
-    If ((Order_Type = "Buy") And (Bid_1 > 0) And (Bid_2 = 0)) Then
+    If Order_Type = "Buy" And Bid_1 > 0 And Bid_2 = 0 Then
         NextBid2 = Order_Volume
     Else
-        If ((Order_Type = "Sell") And (Order_Volume >= Bid_1)) Then
+        If Order_Type = "Sell" And Order_Volume >= Bid_1 Then
             NextBid2 = 0
         Else
             NextBid2 = Bid_2
@@ -14,13 +14,13 @@ End Function
 
 Function NextBid1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume)
   
-    If (Order_Type = "Buy") And (Bid_1 = 0) And (Order_Volume >= Ask_1 + Ask_2) Then
+    If Order_Type = "Buy" And Bid_1 = 0 And Order_Volume >= Ask_1 + Ask_2 Then
         NextBid1 = Order_Volume - Ask_1 - Ask_2
-    ElseIf ((Order_Type = "Sell") And (Bid_1 > 0) And (Order_Volume < Bid_1)) Then
+    ElseIf Order_Type = "Sell" And Bid_1 > 0 And Order_Volume < Bid_1 Then
         NextBid1 = Bid_1 - Order_Volume
-    ElseIf ((Order_Type = "Sell") And (Bid_1 > 0) And (Order_Volume < Bid_1 + Bid_2)) Then
+    ElseIf Order_Type = "Sell" And Bid_1 > 0 And Order_Volume < Bid_1 + Bid_2 Then
         NextBid1 = Bid_1 + Bid_2 - Order_Volume
-    ElseIf ((Order_Type = "Sell") And (Bid_1 > 0) And (Order_Volume >= Bid_1 + Bid_2)) Then
+    ElseIf Order_Type = "Sell" And Bid_1 > 0 And Order_Volume >= Bid_1 + Bid_2 Then
         NextBid1 = 0
     Else:
         NextBid1 = Bid_1
@@ -30,16 +30,16 @@ End Function
 
 Function NextAsk1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume)
     
-    If (Order_Type = "Sell") And (Ask_1 = 0) And (Order_Volume >= Bid_1 + Bid_2) Then
+    If Order_Type = "Sell" And Ask_1 = 0 And Order_Volume >= Bid_1 + Bid_2 Then
         NextAsk1 = Order_Volume - Bid_1 - Bid_2
     Else
-        If (Order_Type = "Buy") And (Ask_1 > 0) And (Order_Volume < Ask_1) Then
+        If Order_Type = "Buy" And Ask_1 > 0 And Order_Volume < Ask_1 Then
             NextAsk1 = Ask_1 - Order_Volume
         Else
-            If ((Order_Type = "Buy") And (Ask_1 > 0) And (Order_Volume < Ask_1 + Ask_2)) Then
+            If Order_Type = "Buy" And Ask_1 > 0 And Order_Volume < Ask_1 + Ask_2 Then
                 NextAsk1 = Ask_1 + Ask_2 - Order_Volume
             Else
-                If ((Order_Type = "Buy") And (Ask_1 > 0) And (Order_Volume >= Ask_1 + Ask_2)) Then
+                If Order_Type = "Buy" And Ask_1 > 0 And Order_Volume >= Ask_1 + Ask_2 Then
                     NextAsk1 = 0
                 Else
                     NextAsk1 = Ask_1
@@ -52,10 +52,10 @@ End Function
 
 Function NextAsk2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume)
 
-    If ((Order_Type = "Sell") And (Ask_1 > 0) And (Ask_2 = 0)) Then
+    If Order_Type = "Sell" And Ask_1 > 0 And Ask_2 = 0 Then
         NextAsk2 = Order_Volume
     Else
-        If ((Order_Type = "Buy") And (Order_Volume >= Ask_1)) Then
+        If Order_Type = "Buy" And Order_Volume >= Ask_1 Then
             NextAsk2 = 0
         Else
             NextAsk2 = Ask_2

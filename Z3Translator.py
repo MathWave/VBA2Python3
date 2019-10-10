@@ -12,7 +12,8 @@ def create_z3():
             def_list.append(line.split(' ')[1].split('(')[0])
             buffer = "\treturn "
         elif line.__contains__('if'):
-            recursion_level += 1
+            if not line.__contains__('elif'):
+                recursion_level += 1
             buffer += 'If(' + line.split('if')[1].split(':')[0].strip() + ', '
             there_was_if_before = True
         elif line.__contains__('else'):
@@ -33,8 +34,12 @@ def create_z3():
                         left += 1
                     elif i == ')':
                         right += 1
-                for i in range(left - right):
-                    newbuf += ')'
+                if left > right:
+                    for i in range(left - right):
+                        newbuf += ')'
+                else:
+                    for i in range(right - left):
+                        newbuf = newbuf[0:len(newbuf) - 1]
                 z3_funcs.write(newbuf)
                 buffer = "\treturn "
 
