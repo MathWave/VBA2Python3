@@ -67,11 +67,12 @@ End Function
 
 Function HSymb(x)
 
-    If x <= 1 Then
-        HSymb = CStr(x)
+    If x = 1 Then
+        HSymb = "1"
+    ElseIf x = 0 Then
+        HSymb = "0"
     Else
         HSymb = "M"
-
     End If
     
 End Function

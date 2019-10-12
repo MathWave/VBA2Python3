@@ -96,6 +96,9 @@ def create_z3():
 
 
     print(def_list)
+    newcur = open('newcur.py').read().split('\n')
+    z3_funcs.write('\n\n' + newcur[2] + '\n')
+    z3_funcs.write(newcur[3])
     z3_funcs.close()
 
 
