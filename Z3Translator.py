@@ -24,12 +24,23 @@ def make_operands(line):
     arr = line.split(', ')
     newline = line
     for elem in arr:
+        if elem.__contains__(' or '):
+            oper = elem.split('If(')[1]
+            and_args = oper.split(' or ')
+            newl = 'Or(' + from_array_into_string(and_args) + ')'
+            newline = newline.replace(oper, newl)
+    arr = newline.split(', ')
+    for elem in arr:
         if elem.__contains__(' and '):
-            if elem.__contains__('If('):
+            if elem.__contains__('Or('):
+                oper = elem.split('Or(')[1]
+            elif elem.__contains__('If('):
                 oper = elem.split('If(')[1]
-                and_args = oper.split(' and ')
-                newl = 'And(' + from_array_into_string(and_args) + ')'
-                newline = newline.replace(oper, newl)
+            else:
+                oper = elem
+            and_args = oper.split(' and ')
+            newl = 'And(' + from_array_into_string(and_args) + ')'
+            newline = newline.replace(oper, newl)
     #return line
     return newline
 
