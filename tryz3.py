@@ -20,7 +20,13 @@ def func(n):
         return "less"
     return "more"
 
-x = Int('x')
-y = Int('y')
+x = String('x')
+y = String('y')
 
-solve([x > 0, ])
+cond = [And(x == StringVal('a'), y == StringVal('b'))]
+
+solve(cond)
+
+#cond = If(x < y, StringVal("hello"), StringVal("world"))
+#f = Function('f', IntSort(), IntSort(), StringSort())
+#solve(f(x,y) == cond)

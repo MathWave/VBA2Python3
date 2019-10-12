@@ -1,3 +1,39 @@
+def find_strings(line):
+    instring = False
+    buffer = ""
+    string_arr = []
+    for i in line:
+        if i == '"':
+            instring ^= True
+            if not instring:
+                string_arr.append(buffer[1::])
+                buffer = ""
+        if instring:
+            buffer += i
+    return set(string_arr)
+
+
+def from_array_into_string(arr):
+    line = ""
+    for i in arr:
+        line += i + ', '
+    return line[0:len(line) - 2]
+
+
+def make_operands(line):
+    arr = line.split(', ')
+    newline = line
+    for elem in arr:
+        if elem.__contains__(' and '):
+            if elem.__contains__('If('):
+                oper = elem.split('If(')[1]
+                and_args = oper.split(' and ')
+                newl = 'And(' + from_array_into_string(and_args) + ')'
+                newline = newline.replace(oper, newl)
+    #return line
+    return newline
+
+
 def create_z3():
     z3_funcs = open('z3_funcs.py', 'w')
     original = open('transpep.py', 'r')
@@ -40,6 +76,10 @@ def create_z3():
                 else:
                     for i in range(right - left):
                         newbuf = newbuf[0:len(newbuf) - 1]
+                strings = find_strings(newbuf)
+                for string in strings:
+                    newbuf = newbuf.replace('"' + string + '"', 'StringVal("' + string + '")')
+                newbuf = make_operands(newbuf)
                 z3_funcs.write(newbuf)
                 buffer = "\treturn "
 

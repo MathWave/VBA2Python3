@@ -7,17 +7,6 @@ from Threading import *
 from Z3Translator import *
 
 
-def FromArrIntoString(arr):
-    line = ""
-    for i in arr:
-        line += str(i) + " "
-    return line[0:len(line) - 1]
-
-
-def FromLineIntoArr(line):
-    return line.split(' ')
-
-
 def GenerateFile():
     newcur = open('newcur.py', 'w')  # тут создаем файл с единственной функцией
     funcs = open('transpep.py', 'r').read().split('\n')  # NextCurrent, которая возвращает следующее положение
@@ -267,7 +256,6 @@ def FindConnectionWayZ3(graph):
 
 
 def BuildGraph(n):
-    current = []  # текущее положение в ячейках
     current = GetStartPosition()
     connections = {}
 
@@ -291,29 +279,6 @@ def BuildGraph(n):
             current = GetStartPosition()
     return connections
 
-
-def BuildIntGraph(n):
-    current = []  # текущее положение в ячейках
-    current = GetStartPosition()
-    connections = {}
-
-    for i in range(n):  # сколько тестов генерируем
-        while True:  # генерируем тестовый комплект
-            data = []
-            for j in more_info:
-                data.append(choice(j))
-            if IsPossible(*current, *data):
-                break
-        nextcurrent = NextCurrent(current, data)  # получаем следующее значение в ячейках
-        if FromArrIntoString(current) not in list(connections.keys()):  # если позиция ячеек еще не встречалась, добавляем
-            connections[FromArrIntoString(current)] = []  # ее в словарь
-        connections[FromArrIntoString(current)].append(FromArrIntoString(nextcurrent))  # добавляем связь
-        current = nextcurrent
-        print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + FromArrIntoString(current) + '\t\t')
-        # выводим результат в консоль и записываем в csv
-        if StopCondition(*current):
-            current = GetStartPosition()
-    return connections
 
 translate("code.txt") # переводим код, он записывается в transpep
 
