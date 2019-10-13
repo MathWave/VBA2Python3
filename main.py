@@ -4,7 +4,7 @@ from os import remove
 from queue import *
 from z3 import *
 from Threading import *
-from Z3Translator import *
+from Z3Translator import UpdateGraph
 
 
 def GenerateFile():
@@ -160,7 +160,7 @@ def GetIntGraph(graph, cons):
 
 def FindNodeWayZ3(graph):
     cons = Coding(graph)
-    intgraph = GetIntGraph(graph, cons)
+    intgraph = graph
     for i in range(len(graph.keys()), 1000):
         s = Solver()
         X = [Int('x%s' % i) for i in range(i)]
@@ -280,6 +280,12 @@ def BuildGraph(n):
     return connections
 
 
+def calc(graph):
+    a = 0
+    for i in graph.keys():
+        a += len(graph[i])
+    return a
+
 translate("code.txt") # переводим код, он записывается в transpep
 
 import transpep
@@ -304,10 +310,10 @@ from newcur import NextCurrent
 #    graph[con] = list(set(graph[con]))
 
 
-connections = BuildGraph(100000)
+connections = BuildGraph(100)
 
 for con in connections.keys():
-    connections[con] = set(connections[con])
+    connections[con] = list(set(connections[con]))
 
 
 print("\n\namount: " + str(len(connections)))
@@ -320,19 +326,13 @@ res.close()
 #remove('transpep.py')
 #remove('newcur.py')
 
-create_z3()
-
 nodes = set(connections.keys())
 
-print("\n\nNode way with Z3:")
-way = FindNodeWay(connections)
-print(way)
+'''
 
-'''
-print("\n\nThe way:")
+print("\n\nNode way:")
 way = FindNodeWay(connections)
 print(way)
-'''
 
 print('\nInstructions: ')
 
@@ -343,9 +343,9 @@ for i in answer:
 
 print('\n\nEuler:\n\n')
 
-'''
 
-ans = FindConnectionWayZ3(connections)
+
+ans = FindConnectionWay(connections)
 for i in ans:
     print(i)
 '''
@@ -353,8 +353,15 @@ for i in ans:
 
 print("HAPPYEND!!!!")
 
+print("\n\nIn current graph: " + str(calc(connections)) + " connections\n\n")
 
+print("Updating...\n\n")
 
+connections = UpdateGraph(connections, info)
+
+print("Now there are " + str(calc(connections)) + " connections\n\n")
+
+print("HAPPYEND!!!![2]")
 
 
 

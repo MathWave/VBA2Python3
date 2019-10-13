@@ -34,17 +34,3 @@ def GetInfo():
 
 def NextCurrent(current, data):
 	return [NextBid2(*current, *data), NextBid1(*current, *data), NextAsk1(*current, *data), NextAsk2(*current, *data)]
-
-
-arr = []
-for i in range(11):
-	arr.append(Int('x_' + str(i)))
-arr[8] = String('x_8')
-	
-solve(GetHyperState(arr[0], arr[1], arr[2], arr[3]) == StringVal('00|00'),
-	  GetHyperState(arr[4], arr[5], arr[6], arr[7]) == StringVal('00|M0'),
-	  NextCurrent([arr[0], arr[1], arr[2], arr[3]], [arr[8], arr[9], arr[10]])[0] == [arr[4], arr[5], arr[6], arr[7]][0],
-	  NextCurrent([arr[0], arr[1], arr[2], arr[3]], [arr[8], arr[9], arr[10]])[1] == [arr[4], arr[5], arr[6], arr[7]][1],
-	  NextCurrent([arr[0], arr[1], arr[2], arr[3]], [arr[8], arr[9], arr[10]])[2] == [arr[4], arr[5], arr[6], arr[7]][2],
-	  NextCurrent([arr[0], arr[1], arr[2], arr[3]], [arr[8], arr[9], arr[10]])[3] == [arr[4], arr[5], arr[6], arr[7]][3],
-	  )
