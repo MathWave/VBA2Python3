@@ -89,7 +89,16 @@ def IsPossible(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume
     if Bid_2 != 0 and Order_Type == "Buy" or Ask_2 != 0 and Order_Type == "Sell":
         return False
     else:
-        return True
+        if Order_Volume < 1:
+            return False
+        else:
+            if Order_Type == "Buy" or Order_Type == "Sell":
+                return True
+            else:
+                return False
+            
+        
+    
 
 
 def GetStartPosition():

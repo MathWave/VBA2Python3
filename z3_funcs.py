@@ -21,7 +21,7 @@ def GetHyperState(X1, X2, X3, X4):
 	return HSymb(X1) + HSymb(X2) + StringVal("|") + HSymb(X3) + HSymb(X4)
 
 def IsPossible(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume):
-	return If(Or(And(Bid_2 != 0, Order_Type == StringVal("Buy")), And(Ask_2 != 0, Order_Type == StringVal("Sell"))), False, True)
+	return If(Or(And(Bid_2 != 0, Order_Type == StringVal("Buy")), And(Ask_2 != 0, Order_Type == StringVal("Sell"))), False, If(Order_Volume < 1, False, If(Or(Order_Type == StringVal("Buy"), Order_Type == StringVal("Sell")), True, False)))
 
 def GetStartPosition():
 	return [0, 0, 0, 0]

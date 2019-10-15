@@ -31,7 +31,16 @@ Function StopCondition(first, second)
 End Function
 
 Function Symb(n)
-    Symb = CStr(n Mod 5)
+    If n Mod 5 = 0 Then
+        Symb = "0"
+    ElseIf n Mod 5 = 1 Then
+        Symb = "1"
+    ElseIf n Mod 5 = 2 Then
+        Symb = "2"
+    ElseIf n Mod 5 = 3 Then
+        Symb = "3"
+    Else
+        Symb = "4"
 End Function
 
 Function GetHyperState(first, second)

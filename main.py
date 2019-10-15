@@ -310,7 +310,7 @@ from newcur import NextCurrent
 #    graph[con] = list(set(graph[con]))
 
 
-connections = BuildGraph(100)
+connections = BuildGraph(10)
 
 for con in connections.keys():
     connections[con] = list(set(connections[con]))
@@ -360,6 +360,9 @@ print("Updating...\n\n")
 connections = UpdateGraph(connections, info)
 
 print("Now there are " + str(calc(connections)) + " connections\n\n")
+
+for i in connections:
+    print(str(i) + ": " + str(connections[i]))
 
 print("HAPPYEND!!!![2]")
 

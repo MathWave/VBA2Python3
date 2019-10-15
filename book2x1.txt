@@ -13,7 +13,7 @@ Function NextBid2(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Vol
 End Function
 
 Function NextBid1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume)
-  
+
     If (Order_Type = "Buy") And (Bid_1 = 0) And (Order_Volume >= Ask_1 + Ask_2) Then
         NextBid1 = Order_Volume - Ask_1 - Ask_2
     ElseIf ((Order_Type = "Sell") And (Bid_1 > 0) And (Order_Volume < Bid_1)) Then
@@ -29,7 +29,7 @@ Function NextBid1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Vol
 End Function
 
 Function NextAsk1(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume)
-    
+
     If (Order_Type = "Sell") And (Ask_1 = 0) And (Order_Volume >= Bid_1 + Bid_2) Then
         NextAsk1 = Order_Volume - Bid_1 - Bid_2
     Else
@@ -74,14 +74,14 @@ Function HSymb(x)
     Else
         HSymb = "M"
     End If
-    
+
 End Function
 
 
 Function GetHyperState(X1, X2, X3, X4)
 
     GetHyperState = HSymb(X1) & HSymb(X2) & "|" & HSymb(X3) & HSymb(X4)
-    
+
 End Function
 
 
@@ -89,7 +89,16 @@ Function IsPossible(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_V
     If Bid_2 <> 0 And Order_Type = "Buy" Or Ask_2 <> 0 And Order_Type = "Sell" Then
         IsPossible = False
     Else
-        IsPossible = True
+        If Order_Volume < 1 Then
+            IsPossible = False
+        Else
+            If Order_Type = "Buy" Or Order_Type = "Sell" Then
+                IsPossible = True
+            Else
+                IsPossible = False
+            End If
+        End If
+    End If
 End Function
 
 Function GetStartPosition()
