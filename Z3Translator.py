@@ -127,7 +127,6 @@ def UpdateGraph(graph, info):
                 for i in range(info[0]):
                     cond.append(NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i])
                 s.add(cond)
-                solve(cond)
                 if s.check() == sat:
                     graph[node].append(node2)
     return graph

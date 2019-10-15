@@ -89,7 +89,7 @@ Function IsPossible(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_V
     If Bid_2 <> 0 And Order_Type = "Buy" Or Ask_2 <> 0 And Order_Type = "Sell" Then
         IsPossible = False
     Else
-        If Order_Volume < 1 Then
+        If Order_Volume < 1 Or Bid_2 < 0 Or Bid_1 < 0 Or Ask_1 < 0 Or Ask_2 < 0 Then
             IsPossible = False
         Else
             If Order_Type = "Buy" Or Order_Type = "Sell" Then

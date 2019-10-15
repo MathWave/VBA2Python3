@@ -70,7 +70,7 @@ def IsPossible(Bid_2, Bid_1, Ask_1, Ask_2, Order_Type, Order_Price, Order_Volume
     if Bid_2 != 0 and Order_Type == "Buy" or Ask_2 != 0 and Order_Type == "Sell":
         return False
     else:
-        if Order_Volume < 1:
+        if Order_Volume < 1 or Bid_2 < 0 or Bid_1 < 0 or Ask_1 < 0 or Ask_2 < 0:
             return False
         else:
             if Order_Type == "Buy" or Order_Type == "Sell":
