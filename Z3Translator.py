@@ -1,4 +1,13 @@
-from z3 import *
+from Stack import Stack
+
+
+def pop_condition(s):
+    if s.size() < 4:
+        return False
+    if s.index(0).__contains__('return') and s.index(1).__contains__('else') and s.index(2).__contains__('return') and s.index(3).__contains__('if'):
+        return True
+    return False
+
 
 def find_strings(line):
     instring = False
@@ -47,7 +56,51 @@ def make_operands(line):
     return newline
 
 
+def improve_line(line):
+    newbuf = '\t' + line
+    strings = find_strings(newbuf)
+    for string in strings:
+        newbuf = newbuf.replace('"' + string + '"', 'StringVal("' + string + '")')
+    newbuf = make_operands(newbuf)
+    return newbuf
+
+
 def create_z3():
+    z3_funcs = open('z3_funcs.py', 'w')
+    original = open('transpep.py', 'r')
+    z3_funcs.write("from z3 import *\n\n")
+    s = Stack()
+    for line in original:
+        if line.__contains__('HSymb'):
+            nanana = 0
+        line = line.replace('\n', '')
+        if line.__contains__('def'):
+            if not s.isEmpty():
+                z3_funcs.write(improve_line(s.pop()))
+            z3_funcs.write('\n\n' + line + '\n')
+        elif line.__contains__('elif'):
+            s.push('else')
+            s.push('if ' + line.split('elif ')[1].split(':')[0])
+        elif line.__contains__('if'):
+            s.push('if ' + line.split('if ')[1].split(':')[0])
+        elif line.__contains__('else'):
+            s.push('else')
+        elif line.__contains__('return'):
+            s.push('return ' + line.split('return ')[1])
+        while pop_condition(s):
+            a = s.pop()
+            b = s.pop()
+            c = s.pop()
+            d = s.pop()
+            s.push("return If(" + d[3:] + ', ' + c[7:] + ', ' + a[7:] + ')')
+    z3_funcs.write(improve_line(s.pop()))
+    newcur = open('newcur.py').read().split('\n')
+    z3_funcs.write('\n\n' + newcur[2] + '\n')
+    z3_funcs.write(newcur[3])
+    z3_funcs.close()
+
+
+def create_z3__():
     z3_funcs = open('z3_funcs.py', 'w')
     original = open('transpep.py', 'r')
     z3_funcs.write("from z3 import *\n\n")
@@ -57,6 +110,8 @@ def create_z3():
     recursion_level = 0
     for line in original:
         if line.__contains__('def'):
+            if line.__contains__('def NextBuy02'):
+                nanana = 0
             z3_funcs.write('\n\n' + line)
             def_list.append(line.split(' ')[1].split('(')[0])
             buffer = "\treturn "
@@ -107,4 +162,4 @@ def create_z3():
 
 
 
-create_z3()
+#create_z3()

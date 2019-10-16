@@ -334,7 +334,7 @@ from newcur import NextCurrent
 #    graph[con] = list(set(graph[con]))
 
 
-connections = BuildGraph(10000)
+connections = BuildGraph(100)
 
 for con in connections.keys():
     connections[con] = list(set(connections[con]))
