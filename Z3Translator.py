@@ -1,5 +1,4 @@
 from z3 import *
-from z3_funcs import *
 
 def find_strings(line):
     instring = False
@@ -106,30 +105,6 @@ def create_z3():
     return def_list
 
 
-def UpdateGraph(graph, info):
-    create_z3()
-    arr = []
-    for i in range(2 * info[0]):
-        arr.append(Int('x_' + str(i)))
-    for i in range(info[1]):
-        if (type(info[2 + i][0]) is int):
-            arr.append(Int('x_' + str(info[0] * 2 + i + 2)))
-        else:
-            arr.append(String('x_' + str(info[0] * 2 + i + 2)))
-    for node in graph:
-        for node2 in graph:
-            if node2 not in graph[node]:
-                s = Solver()
-                cond = []
-                cond.append(GetHyperState(*arr[0:info[0]]) == StringVal(node))
-                cond.append(GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
-                cond.append(IsPossible(*arr[0:info[0]], *arr[info[0] * 2::]))
-                for i in range(info[0]):
-                    cond.append(NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i])
-                s.add(cond)
-                if s.check() == sat:
-                    graph[node].append(node2)
-    return graph
 
 
 create_z3()

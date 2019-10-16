@@ -4,7 +4,31 @@ from os import remove
 from queue import *
 from z3 import *
 from Threading import *
-from Z3Translator import UpdateGraph
+
+def UpdateGraph(graph, info):
+    #create_z3()
+    arr = []
+    for i in range(2 * info[0]):
+        arr.append(Int('x_' + str(i) + '_int'))
+    for i in range(info[1]):
+        if (type(info[2 + i][0]) is int):
+            arr.append(Int('x_' + str(info[0] * 2 + i + 2) + '_int'))
+        else:
+            arr.append(String('x_' + str(info[0] * 2 + i + 2) + '_str'))
+    for node in graph:
+        for node2 in graph:
+            if node2 not in graph[node]:
+                s = Solver()
+                cond = []
+                cond.append(z3_funcs.GetHyperState(*arr[0:info[0]]) == StringVal(node))
+                cond.append(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
+                cond.append(z3_funcs.IsPossible(*arr[0:info[0]], *arr[info[0] * 2::]))
+                for i in range(info[0]):
+                    cond.append(z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i])
+                s.add(cond)
+                if s.check() == sat:
+                    graph[node].append(node2)
+    return graph
 
 
 def GenerateFile():
@@ -310,7 +334,7 @@ from newcur import NextCurrent
 #    graph[con] = list(set(graph[con]))
 
 
-connections = BuildGraph(10)
+connections = BuildGraph(10000)
 
 for con in connections.keys():
     connections[con] = list(set(connections[con]))
@@ -356,6 +380,12 @@ print("HAPPYEND!!!!")
 print("\n\nIn current graph: " + str(calc(connections)) + " connections\n\n")
 
 print("Updating...\n\n")
+
+from Z3Translator import create_z3
+
+create_z3()
+
+import z3_funcs
 
 connections = UpdateGraph(connections, info)
 
