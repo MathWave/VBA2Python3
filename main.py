@@ -5,8 +5,9 @@ from queue import *
 from z3 import *
 from Threading import *
 
-def UpdateGraph(graph, info):
-    #create_z3()
+amount_of_tests = 1
+
+def GetParamsArray(info):
     arr = []
     for i in range(2 * info[0]):
         arr.append(Int('x_' + str(i) + '_int'))
@@ -15,6 +16,11 @@ def UpdateGraph(graph, info):
             arr.append(Int('x_' + str(info[0] * 2 + i + 2) + '_int'))
         else:
             arr.append(String('x_' + str(info[0] * 2 + i + 2) + '_str'))
+    return arr
+
+def UpdateConnections(graph, info):
+    arr = GetParamsArray(info)
+    count = 0
     for node in graph:
         for node2 in graph:
             if node2 not in graph[node]:
@@ -23,12 +29,43 @@ def UpdateGraph(graph, info):
                 cond.append(z3_funcs.GetHyperState(*arr[0:info[0]]) == StringVal(node))
                 cond.append(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
                 cond.append(z3_funcs.IsPossible(*arr[0:info[0]], *arr[info[0] * 2::]))
-                for i in range(info[0]):
-                    cond.append(z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i])
+                cond += [z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i] for i in range(info[0])]
                 s.add(cond)
                 if s.check() == sat:
                     graph[node].append(node2)
+                count += 1
+                print('ready ' + str(count / len(graph.keys()) ** 2 * 100) + ' %')
     return graph
+
+
+def UpdateNodes(graph, info):
+    arr = GetParamsArray(info)
+    count = 0
+    stop = False
+    while not stop:
+        stop = True
+        print("Now there are " + str(len(graph.keys())) + " nodes")
+        for node in graph.keys():
+            s = Solver()
+            current = arr[0:info[0]]
+            add = arr[info[0] * 2:]
+            find = String('find')
+            cond = []
+            cond.append(z3_funcs.IsPossible(*current, *add))
+            cond.append(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
+            for i in graph.keys():
+                cond.append(find != StringVal(i))
+            cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
+            #cond.append(Or([z3_funcs.GetHyperState(*current) == StringVal(i) for i in graph.keys()]))
+            s.add(cond)
+            #solve(cond)
+            if s.check() == sat:
+                stop = False
+                m = s.model()
+                graph[str(m).split('find = ')[1].split(',')[0].strip('"')] = []
+                break
+    return graph
+
 
 
 def GenerateFile():
@@ -239,7 +276,7 @@ def FindConnectionWayZ3(graph):
     for i in intgraph.keys():
         for j in intgraph[i]:
             allconnections.append([i, j])
-    for i in range(len(graph.keys()), 1000):
+    for i in range(len(graph.keys()), 10):
         s = Solver()
         X = [Int('x%s' % j) for j in range(i)]
         cond1 = [X[0] == 0]
@@ -334,7 +371,7 @@ from newcur import NextCurrent
 #    graph[con] = list(set(graph[con]))
 
 
-connections = BuildGraph(100)
+connections = BuildGraph(amount_of_tests)
 
 for con in connections.keys():
     connections[con] = list(set(connections[con]))
@@ -387,7 +424,9 @@ create_z3()
 
 import z3_funcs
 
-connections = UpdateGraph(connections, info)
+connections = UpdateNodes(connections, info)
+
+connections = UpdateConnections(connections, info)
 
 print("Now there are " + str(calc(connections)) + " connections\n\n")
 
@@ -396,26 +435,3 @@ for i in connections:
 
 print("HAPPYEND!!!![2]")
 
-
-
-'''
-def UpdateGraph(graph):
-    func_params = []
-    for i in range(info[0]):
-        func_params.append(IntSort())
-    for i in range(2, info[1] + 2):
-        if type(info[i][0]) is int:
-            func_params.append(IntSort())
-        else:
-            func_params.append(StringSort())
-    hyperstate_z3 = Function('hyperstate_z3', *func_params, StringSort())
-    for node in graph.keys():
-        for other_node in graph.keys():
-            if node != other_node:
-                start = String('start')
-                cond1 = [start == node]
-                end = String('end')
-                cond2 = [end == other_node]
-
-    print(func_params)
-'''
