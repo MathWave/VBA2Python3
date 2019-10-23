@@ -3,9 +3,15 @@
   <component name="ChangeListManager">
     <list default="true" id="a5ffdf37-b41b-41ba-b4e7-12d389bcd9a2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Z3Translator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Z3Translator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code1.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/results.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/newcur.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/results.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/trans.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/transpep.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tryz3.py" beforeDir="false" afterPath="$PROJECT_DIR$/tryz3.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/z3_funcs.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -47,7 +53,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.tryz3">
     <configuration name="Z3Translator" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="VBA2Python" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -160,10 +166,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.tryz3" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.Z3Translator" />
         <item itemvalue="Python.z3_funcs" />
-        <item itemvalue="Python.tryz3" />
         <item itemvalue="Python.translate" />
       </list>
     </recent_temporary>
@@ -224,7 +230,13 @@
       <workItem from="1571119258492" duration="138000" />
       <workItem from="1571132213471" duration="4160000" />
       <workItem from="1571170994341" duration="434000" />
-      <workItem from="1571208420790" duration="23514000" />
+      <workItem from="1571208420790" duration="25621000" />
+      <workItem from="1571376814641" duration="413000" />
+      <workItem from="1571391817453" duration="3738000" />
+      <workItem from="1571657173006" duration="927000" />
+      <workItem from="1571729990379" duration="3453000" />
+      <workItem from="1571808785994" duration="6678000" />
+      <workItem from="1571824088219" duration="1148000" />
     </task>
     <servers />
   </component>
@@ -253,18 +265,23 @@
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tryz3.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main.py</url>
-          <line>61</line>
-          <option name="timeStamp" value="27" />
+          <line>120</line>
+          <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/VBA2Python$translate.coverage" NAME="translate Coverage Results" MODIFIED="1567071211174" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/VBA2Python$tryz3.coverage" NAME="tryz3 Coverage Results" MODIFIED="1570798159824" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/VBA2Python$tryz3.coverage" NAME="tryz3 Coverage Results" MODIFIED="1571826563530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VBA2Python$z3_funcs.coverage" NAME="z3_funcs Coverage Results" MODIFIED="1570947531892" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/VBA2Python$main.coverage" NAME="main Coverage Results" MODIFIED="1571336666144" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/VBA2Python$main.coverage" NAME="main Coverage Results" MODIFIED="1571826002595" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VBA2Python$Z3Translator.coverage" NAME="Z3Translator Coverage Results" MODIFIED="1571250973895" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

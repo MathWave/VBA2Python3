@@ -4,8 +4,11 @@ from os import remove
 from queue import *
 from z3 import *
 from Threading import *
+from time import time
 
-amount_of_tests = 1
+
+amount_of_tests = 10000
+
 
 def GetParamsArray(info):
     arr = []
@@ -17,6 +20,43 @@ def GetParamsArray(info):
         else:
             arr.append(String('x_' + str(info[0] * 2 + i + 2) + '_str'))
     return arr
+
+
+class FindNodes(Thread):
+
+    def __init__(self, fullgraph, partgraph):
+        super().__init__()
+        self.fullgraph = fullgraph
+        self.partgraph = partgraph
+        self.add = []
+
+    def run(self):
+        arr = GetParamsArray(info)
+        count = 0
+        stop = False
+        while not stop:
+            stop = True
+            print("Now there are " + str(len(self.add)) + " nodes")
+            for node in self.partgraph:
+                s = Solver()
+                current = arr[0:info[0]]
+                add = arr[info[0] * 2:]
+                find = String('find')
+                cond = []
+                cond.append(z3_funcs.IsPossible(*current, *add))
+                cond.append(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
+                for i in self.fullgraph:
+                    cond.append(find != StringVal(i))
+                cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
+                # cond.append(Or([z3_funcs.GetHyperState(*current) == StringVal(i) for i in graph.keys()]))
+                s.add(cond)
+                # solve(cond)
+                if s.check() == sat:
+                    stop = False
+                    m = s.model()
+                    add.append(str(m).split('find = ')[1].split(',')[0].strip('"'))
+                    break
+
 
 def UpdateConnections(graph, info):
     arr = GetParamsArray(info)
@@ -38,7 +78,7 @@ def UpdateConnections(graph, info):
     return graph
 
 
-def UpdateNodes(graph, info):
+def UpdateNodes(graph):
     arr = GetParamsArray(info)
     count = 0
     stop = False
@@ -66,6 +106,28 @@ def UpdateNodes(graph, info):
                 break
     return graph
 
+
+def UpdateNodesThreading(graph):
+    threads = []
+    nodes_list = list(graph.keys())
+    part = 4
+    step = len(nodes_list) // part
+
+    for i in range(part - 1):
+        threads.append(FindNodes(nodes_list, nodes_list[step * i : step * (i + 1)]))
+    threads.append(FindNodes(nodes_list, nodes_list[step * (part - 1) :]))
+    for thread in threads:
+        thread.start()
+    while True:
+        stop = False
+        for i in threads:
+            stop += i.is_alive()
+        if not stop:
+            break
+    for thread in threads:
+        for node in thread.add:
+            graph.add(node, [])
+    return graph
 
 
 def GenerateFile():
@@ -341,11 +403,15 @@ def BuildGraph(n):
     return connections
 
 
-def calc(graph):
-    a = 0
+def node_amount(graph):
+    return len(graph.keys())
+
+
+def connections_amount(graph):
+    sum = 0
     for i in graph.keys():
-        a += len(graph[i])
-    return a
+        sum += len(i)
+    return sum
 
 translate("code.txt") # переводим код, он записывается в transpep
 
@@ -414,7 +480,7 @@ for i in ans:
 
 print("HAPPYEND!!!!")
 
-print("\n\nIn current graph: " + str(calc(connections)) + " connections\n\n")
+print("\n\nIn current graph:\n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
 
 print("Updating...\n\n")
 
@@ -424,14 +490,28 @@ create_z3()
 
 import z3_funcs
 
-connections = UpdateNodes(connections, info)
-
+t = time()
+connections = UpdateNodes(connections)
+print('\n\nSpent time for nodes: ' + str(int(time() - t)))
 connections = UpdateConnections(connections, info)
+print('\n\nSpent time for all: ' + str(int(time() - t)))
 
-print("Now there are " + str(calc(connections)) + " connections\n\n")
+print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
 
 for i in connections:
     print(str(i) + ": " + str(connections[i]))
 
 print("HAPPYEND!!!![2]")
 
+'''
+print("\n\nNode way:")
+way = FindNodeWay(connections)
+print(way)
+
+print('\nInstructions: ')
+
+answer = GetInstruction(way)
+
+for i in answer:
+    print(i)
+'''
