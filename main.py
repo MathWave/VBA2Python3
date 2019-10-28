@@ -7,7 +7,7 @@ from Threading import *
 from time import time
 
 
-amount_of_tests = 10000
+amount_of_tests = 1
 
 
 def GetParamsArray(info):
@@ -20,6 +20,48 @@ def GetParamsArray(info):
         else:
             arr.append(String('x_' + str(info[0] * 2 + i + 2) + '_str'))
     return arr
+
+
+def getValue(model, param):
+    values = str(model).replace('[', '').replace(']', '').split(',\n')
+    for i in values:
+        if i.__contains__(param):
+            return i.split(' = ')[1].strip('"')
+
+
+class FindEdges(Thread):
+
+    def __init__(self, fullgraph, partgraph):
+        super().__init__()
+        self.fullgraph = fullgraph
+        self.partgraph = partgraph
+        self.add = {}
+        for i in partgraph:
+            self.add[i] = []
+
+    def run(self):
+        arr = GetParamsArray(info)
+        count = 0
+        for node in self.partgraph:
+            for node2 in self.fullgraph.keys():
+                if node2 not in self.fullgraph[node]:
+                    s = Solver()
+                    cond = []
+                    cond.append(z3_funcs.GetHyperState(*arr[0:info[0]]) == StringVal(node))
+                    cond.append(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
+                    cond.append(z3_funcs.IsPossible(*arr[0:info[0]], *arr[info[0] * 2::]))
+                    cond += [z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[
+                        info[0] + i] for i in range(info[0])]
+                    s.add(cond)
+                    checker = 0
+                    try:
+                        checker = s.check()
+                    except:
+                        print('sosatb')
+                    if checker == sat:
+                        self.add[node].append(node2)
+                    count += 1
+                    #print('ready ' + str(count / len(graph.keys()) ** 2 * 100) + ' %')
 
 
 class FindNodes(Thread):
@@ -58,7 +100,7 @@ class FindNodes(Thread):
                     break
 
 
-def UpdateConnections(graph, info):
+def UpdateConnections(graph):
     arr = GetParamsArray(info)
     count = 0
     for node in graph:
@@ -81,29 +123,32 @@ def UpdateConnections(graph, info):
 def UpdateNodes(graph):
     arr = GetParamsArray(info)
     count = 0
-    stop = False
-    while not stop:
-        stop = True
-        print("Now there are " + str(len(graph.keys())) + " nodes")
-        for node in graph.keys():
-            s = Solver()
-            current = arr[0:info[0]]
-            add = arr[info[0] * 2:]
-            find = String('find')
-            cond = []
-            cond.append(z3_funcs.IsPossible(*current, *add))
-            cond.append(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
-            for i in graph.keys():
-                cond.append(find != StringVal(i))
-            cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
-            #cond.append(Or([z3_funcs.GetHyperState(*current) == StringVal(i) for i in graph.keys()]))
-            s.add(cond)
-            #solve(cond)
-            if s.check() == sat:
-                stop = False
-                m = s.model()
-                graph[str(m).split('find = ')[1].split(',')[0].strip('"')] = []
-                break
+    q = Queue()
+    for i in graph.keys():
+        q.put(i)
+    while not q.empty():
+        node = q.queue[0]
+        s = Solver()
+        current = arr[0:info[0]]
+        add = arr[info[0] * 2:]
+        find = String('find')
+        cond = []
+        cond.append(z3_funcs.IsPossible(*current, *add))
+        cond.append(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
+        cond += [find != StringVal(name) for name in graph.keys()]
+        cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
+        # cond.append(Or([z3_funcs.GetHyperState(*current) == StringVal(i) for i in graph.keys()]))
+        s.add(cond)
+        # solve(cond)
+        if s.check() == sat:
+            m = s.model()
+            newval = getValue(m, 'find')
+            graph[newval] = []
+            graph[node].append(newval)
+            q.put(newval)
+            print("Now there are " + str(len(graph.keys())) + " nodes")
+        else:
+            q.get()
     return graph
 
 
@@ -127,6 +172,30 @@ def UpdateNodesThreading(graph):
     for thread in threads:
         for node in thread.add:
             graph.add(node, [])
+    return graph
+
+
+def UpdateConnectionsThreading(graph):
+    threads = []
+    nodes_list = list(graph.keys())
+    part = 2
+    step = len(nodes_list) // part
+
+    for i in range(part - 1):
+        threads.append(FindEdges(graph, nodes_list[step * i: step * (i + 1)]))
+    threads.append(FindEdges(graph, nodes_list[step * (part - 1):]))
+    for thread in threads:
+        thread.start()
+    while True:
+        stop = False
+        for i in threads:
+            stop += i.is_alive()
+        if not stop:
+            break
+    for thread in threads:
+        for node in thread.add.keys():
+            graph[node] += thread.add[node]
+            print(thread.add[node])
     return graph
 
 
@@ -410,7 +479,7 @@ def node_amount(graph):
 def connections_amount(graph):
     sum = 0
     for i in graph.keys():
-        sum += len(i)
+        sum += len(graph[i])
     return sum
 
 translate("code.txt") # переводим код, он записывается в transpep
@@ -493,7 +562,8 @@ import z3_funcs
 t = time()
 connections = UpdateNodes(connections)
 print('\n\nSpent time for nodes: ' + str(int(time() - t)))
-connections = UpdateConnections(connections, info)
+exit()
+connections = UpdateConnections(connections)
 print('\n\nSpent time for all: ' + str(int(time() - t)))
 
 print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
