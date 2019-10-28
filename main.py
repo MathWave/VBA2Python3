@@ -29,35 +29,28 @@ def getValue(model, param):
             return i.split(' = ')[1].strip('"')
 
 
-def getFindConnections(graph):
-    visit = {}
-    for i in graph.keys():
-        visit[i] = [j for j in graph.keys()]
-    for i in graph.keys():
-        for j in graph[i]:
-            visit[i].remove(j)
-    return visit
-
-
 def UpdateConnections(graph):
-    visit = getFindConnections(graph)
     arr = GetParamsArray(info)
     count = 0
     s = Solver()
+    find = String('find')
     add = arr[info[0] * 2:]
     current = arr[0:info[0]]
     s.add(z3_funcs.IsPossible(*current, *add))
-    s.add([z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i] for i
-             in range(info[0])])
-    for node in visit.keys():
-        for node2 in visit[node]:
+    s.add([z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:])[i] == arr[info[0] + i] for i in range(info[0])])
+    s.add(find == z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]))
+    for node in graph.keys():
+        flag = True
+        while flag:
             s.push()
-            cond = []
-            cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
-            cond.append(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
-            s.add(cond)
+            s.add(z3_funcs.GetHyperState(*current) == StringVal(node))
+            for node2 in graph[node]:
+                s.add(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) != StringVal(node2))
             if s.check() == sat:
-                graph[node].add(node2)
+                model = str(s.model())
+                graph[node].add(getValue(model, 'find'))
+            else:
+                flag = False
             count += 1
             print('ready ' + str(count / len(graph.keys()) ** 2 * 100) + ' %')
             s.pop()

@@ -77,8 +77,6 @@ Function HSymb(x)
         HSymb = "3"
     ElseIf x = 4 Then
         HSymb = "4"
-    ElseIf x = 5 Then
-        HSymb = "5"
     Else
         HSymb = "M"
     End If

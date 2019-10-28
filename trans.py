@@ -77,8 +77,6 @@ def HSymb(x):
         return "3"
     elif x == 4:
         return "4"
-    elif x == 5:
-        return "5"
     else:
         return "M"
     
