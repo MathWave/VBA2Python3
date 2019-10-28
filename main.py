@@ -29,100 +29,43 @@ def getValue(model, param):
             return i.split(' = ')[1].strip('"')
 
 
-class FindEdges(Thread):
-
-    def __init__(self, fullgraph, partgraph):
-        super().__init__()
-        self.fullgraph = fullgraph
-        self.partgraph = partgraph
-        self.add = {}
-        for i in partgraph:
-            self.add[i] = []
-
-    def run(self):
-        arr = GetParamsArray(info)
-        count = 0
-        for node in self.partgraph:
-            for node2 in self.fullgraph.keys():
-                if node2 not in self.fullgraph[node]:
-                    s = Solver()
-                    cond = []
-                    cond.append(z3_funcs.GetHyperState(*arr[0:info[0]]) == StringVal(node))
-                    cond.append(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
-                    cond.append(z3_funcs.IsPossible(*arr[0:info[0]], *arr[info[0] * 2::]))
-                    cond += [z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[
-                        info[0] + i] for i in range(info[0])]
-                    s.add(cond)
-                    checker = 0
-                    try:
-                        checker = s.check()
-                    except:
-                        print('sosatb')
-                    if checker == sat:
-                        self.add[node].append(node2)
-                    count += 1
-                    #print('ready ' + str(count / len(graph.keys()) ** 2 * 100) + ' %')
-
-
-class FindNodes(Thread):
-
-    def __init__(self, fullgraph, partgraph):
-        super().__init__()
-        self.fullgraph = fullgraph
-        self.partgraph = partgraph
-        self.add = []
-
-    def run(self):
-        arr = GetParamsArray(info)
-        count = 0
-        stop = False
-        while not stop:
-            stop = True
-            print("Now there are " + str(len(self.add)) + " nodes")
-            for node in self.partgraph:
-                s = Solver()
-                current = arr[0:info[0]]
-                add = arr[info[0] * 2:]
-                find = String('find')
-                cond = []
-                cond.append(z3_funcs.IsPossible(*current, *add))
-                cond.append(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
-                for i in self.fullgraph:
-                    cond.append(find != StringVal(i))
-                cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
-                # cond.append(Or([z3_funcs.GetHyperState(*current) == StringVal(i) for i in graph.keys()]))
-                s.add(cond)
-                # solve(cond)
-                if s.check() == sat:
-                    stop = False
-                    m = s.model()
-                    add.append(str(m).split('find = ')[1].split(',')[0].strip('"'))
-                    break
+def getFindConnections(graph):
+    visit = {}
+    for i in graph.keys():
+        visit[i] = [j for j in graph.keys()]
+    for i in graph.keys():
+        for j in graph[i]:
+            visit[i].remove(j)
+    return visit
 
 
 def UpdateConnections(graph):
+    visit = getFindConnections(graph)
     arr = GetParamsArray(info)
     count = 0
-    for node in graph:
-        for node2 in graph:
-            if node2 not in graph[node]:
-                s = Solver()
-                cond = []
-                cond.append(z3_funcs.GetHyperState(*arr[0:info[0]]) == StringVal(node))
-                cond.append(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
-                cond.append(z3_funcs.IsPossible(*arr[0:info[0]], *arr[info[0] * 2::]))
-                cond += [z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i] for i in range(info[0])]
-                s.add(cond)
-                if s.check() == sat:
-                    graph[node].append(node2)
-                count += 1
-                print('ready ' + str(count / len(graph.keys()) ** 2 * 100) + ' %')
+    s = Solver()
+    add = arr[info[0] * 2:]
+    current = arr[0:info[0]]
+    s.add(z3_funcs.IsPossible(*current, *add))
+    s.add([z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:info[0] * 2 + info[1]])[i] == arr[info[0] + i] for i
+             in range(info[0])])
+    for node in visit.keys():
+        for node2 in visit[node]:
+            s.push()
+            cond = []
+            cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
+            cond.append(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) == StringVal(node2))
+            s.add(cond)
+            if s.check() == sat:
+                graph[node].add(node2)
+            count += 1
+            print('ready ' + str(count / len(graph.keys()) ** 2 * 100) + ' %')
+            s.pop()
     return graph
 
 
 def UpdateNodes(graph):
     arr = GetParamsArray(info)
-    count = 0
     q = Queue()
     for i in graph.keys():
         q.put(i)
@@ -137,65 +80,17 @@ def UpdateNodes(graph):
         cond.append(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
         cond += [find != StringVal(name) for name in graph.keys()]
         cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
-        # cond.append(Or([z3_funcs.GetHyperState(*current) == StringVal(i) for i in graph.keys()]))
         s.add(cond)
-        # solve(cond)
         if s.check() == sat:
             m = s.model()
             newval = getValue(m, 'find')
-            graph[newval] = []
-            graph[node].append(newval)
+            graph[newval] = set()
+            graph[node].add(newval)
             q.put(newval)
             print("Now there are " + str(len(graph.keys())) + " nodes")
         else:
+            print("All nodes connected with " + node + " found")
             q.get()
-    return graph
-
-
-def UpdateNodesThreading(graph):
-    threads = []
-    nodes_list = list(graph.keys())
-    part = 4
-    step = len(nodes_list) // part
-
-    for i in range(part - 1):
-        threads.append(FindNodes(nodes_list, nodes_list[step * i : step * (i + 1)]))
-    threads.append(FindNodes(nodes_list, nodes_list[step * (part - 1) :]))
-    for thread in threads:
-        thread.start()
-    while True:
-        stop = False
-        for i in threads:
-            stop += i.is_alive()
-        if not stop:
-            break
-    for thread in threads:
-        for node in thread.add:
-            graph.add(node, [])
-    return graph
-
-
-def UpdateConnectionsThreading(graph):
-    threads = []
-    nodes_list = list(graph.keys())
-    part = 2
-    step = len(nodes_list) // part
-
-    for i in range(part - 1):
-        threads.append(FindEdges(graph, nodes_list[step * i: step * (i + 1)]))
-    threads.append(FindEdges(graph, nodes_list[step * (part - 1):]))
-    for thread in threads:
-        thread.start()
-    while True:
-        stop = False
-        for i in threads:
-            stop += i.is_alive()
-        if not stop:
-            break
-    for thread in threads:
-        for node in thread.add.keys():
-            graph[node] += thread.add[node]
-            print(thread.add[node])
     return graph
 
 
@@ -460,8 +355,8 @@ def BuildGraph(n):
                 break
         nextcurrent = NextCurrent(current, data)  # получаем следующее значение в ячейках
         if GetHyperState(*current) not in list(connections.keys()):  # если позиция ячеек еще не встречалась, добавляем
-            connections[GetHyperState(*current)] = []  # ее в словарь
-        connections[GetHyperState(*current)].append(GetHyperState(*nextcurrent))  # добавляем связь
+            connections[GetHyperState(*current)] = set()  # ее в словарь
+        connections[GetHyperState(*current)].add(GetHyperState(*nextcurrent))  # добавляем связь
         current = nextcurrent
         print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + GetHyperState(*current) + '\t\t' + PrintArr(current))
         res.write('"' + str(i + 1) + '";"' + PrintArr(data) + '";"' + GetHyperState(*current) + '";"' + PrintArr(
@@ -507,9 +402,6 @@ from newcur import NextCurrent
 
 
 connections = BuildGraph(amount_of_tests)
-
-for con in connections.keys():
-    connections[con] = list(set(connections[con]))
 
 
 print("\n\namount: " + str(len(connections)))
@@ -562,7 +454,6 @@ import z3_funcs
 t = time()
 connections = UpdateNodes(connections)
 print('\n\nSpent time for nodes: ' + str(int(time() - t)))
-exit()
 connections = UpdateConnections(connections)
 print('\n\nSpent time for all: ' + str(int(time() - t)))
 
