@@ -1,16 +1,12 @@
-from z3 import *
-from threading import Thread
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
 
-def getValue(model, param):
-    values = str(model).replace('[', '').replace(']', '').split(', ')
-    for i in values:
-        if i.__contains__(param):
-            return i.split(' = ')[1]
+G=nx.DiGraph()
 
-s = Solver()
-x = Int('x')
-s.add(x == 1000)
-if s.check() == sat:
-    print(getValue(s.model(), 'x'))
-else:
-    print('no')
+G.add_node(1)
+
+G.add_node(2)
+G.add_edge(1,2)
+nx.draw(G)
+plt.show()

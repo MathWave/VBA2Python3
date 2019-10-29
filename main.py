@@ -5,6 +5,8 @@ from queue import *
 from z3 import *
 from Threading import *
 from time import time
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 amount_of_tests = 1
@@ -51,9 +53,9 @@ def UpdateConnections(graph):
                 graph[node].add(getValue(model, 'find'))
             else:
                 flag = False
-            count += 1
-            print('ready ' + str(count / len(graph.keys()) ** 2 * 100) + ' %')
             s.pop()
+        print('ready ' + str(count / len(graph.keys()) * 100) + ' %')
+        count += 1
     return graph
 
 
@@ -62,15 +64,45 @@ def UpdateNodes(graph):
     q = Queue()
     for i in graph.keys():
         q.put(i)
+    s = Solver()
+    current = arr[0:info[0]]
+    add = arr[info[0] * 2:]
+    find = String('find')
+    s.add(z3_funcs.IsPossible(*current, *add))
+    s.add(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
+    while not q.empty():
+        s.push()
+        node = q.queue[0]
+        s.add([find != StringVal(name) for name in graph.keys()])
+        s.add(z3_funcs.GetHyperState(*current) == StringVal(node))
+        if s.check() == sat:
+            m = s.model()
+            newval = getValue(m, 'find')
+            graph[newval] = set()
+            graph[node].add(newval)
+            q.put(newval)
+            print("Now there are " + str(len(graph.keys())) + " nodes")
+        else:
+            print("All nodes connected with " + node + " found")
+            q.get()
+        s.pop()
+    return graph
+
+
+def updateGraph(graph):
+    arr = GetParamsArray(info)
+    q = Queue()
+    for i in graph.keys():
+        q.put(i)
+    s = Solver()
+    current = arr[0:info[0]]
+    add = arr[info[0] * 2:]
+    find = String('find')
+    s.add(z3_funcs.IsPossible(*current, *add))
+    s.add(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
     while not q.empty():
         node = q.queue[0]
-        s = Solver()
-        current = arr[0:info[0]]
-        add = arr[info[0] * 2:]
-        find = String('find')
         cond = []
-        cond.append(z3_funcs.IsPossible(*current, *add))
-        cond.append(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
         cond += [find != StringVal(name) for name in graph.keys()]
         cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
         s.add(cond)
@@ -84,7 +116,6 @@ def UpdateNodes(graph):
         else:
             print("All nodes connected with " + node + " found")
             q.get()
-    return graph
 
 
 def GenerateFile():
@@ -370,6 +401,13 @@ def connections_amount(graph):
         sum += len(graph[i])
     return sum
 
+
+def printGraph(graph):
+    for i in graph:
+        print(str(i) + ": " + str(graph[i]))
+
+
+
 translate("code.txt") # переводим код, он записывается в transpep
 
 import transpep
@@ -396,12 +434,10 @@ from newcur import NextCurrent
 
 connections = BuildGraph(amount_of_tests)
 
-
-print("\n\namount: " + str(len(connections)))
 print('\n\n\n')
 
-for con in connections.keys():                       # выводим ребра графа в консоль
-    print(str(con) + ": " + str(connections[con]))
+printGraph(connections)
+
 res.close()
 #remove('trans.py')        # удаляем сгенерированные файлы
 #remove('transpep.py')
@@ -452,10 +488,19 @@ print('\n\nSpent time for all: ' + str(int(time() - t)))
 
 print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
 
-for i in connections:
-    print(str(i) + ": " + str(connections[i]))
+printGraph(connections)
 
 print("HAPPYEND!!!![2]")
+
+G = nx.DiGraph()
+
+for node in connections.keys():
+    for node2 in connections[node]:
+        G.add_edge(node, node2)
+
+nx.draw(G, with_labels=True, font_weight='bold')
+
+plt.show()
 
 '''
 print("\n\nNode way:")
