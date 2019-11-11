@@ -72,18 +72,18 @@ def create_z3():
     s = Stack()
     for line in original:
         line = line.replace('\n', '')
-        if line.__contains__('def'):
+        if line.__contains__('def '):
             if not s.isEmpty():
                 z3_funcs.write(improve_line(s.pop()))
             z3_funcs.write('\n\n' + line + '\n')
-        elif line.__contains__('elif'):
+        elif line.__contains__('elif '):
             s.push('else')
             s.push('if ' + line.split('elif ')[1].split(':')[0])
-        elif line.__contains__('if'):
+        elif line.__contains__('if '):
             s.push('if ' + line.split('if ')[1].split(':')[0])
         elif line.__contains__('else'):
             s.push('else')
-        elif line.__contains__('return'):
+        elif line.__contains__('return '):
             s.push('return ' + line.split('return ')[1])
         while pop_condition(s):
             a = s.pop()
@@ -96,10 +96,6 @@ def create_z3():
     z3_funcs.write('\n\n' + newcur[2] + '\n')
     z3_funcs.write(newcur[3])
     z3_funcs.close()
-
-
-
-
 
 
 #create_z3()

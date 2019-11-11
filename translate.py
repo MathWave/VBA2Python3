@@ -56,6 +56,7 @@ def translate(filename):
     current = ""
 
     for line in file: # тут простой перевод
+        line = line.replace(' And ', ' and ').replace(' Or ', ' or ')
         if line.__contains__('End Function'):
             trans.write('\n')
             current = ''

@@ -1,15 +1,47 @@
 from translate import translate
 from random import choice
-from os import remove
+from os import remove, rmdir
 from queue import *
 from z3 import *
-from Threading import *
 from time import time
 import networkx as nx
 import matplotlib.pyplot as plt
+from zipfile import ZipFile
+import subprocess
+import os
 
 
-amount_of_tests = 1
+amount_of_tests = 100000
+openfile = "models/book2x1.xlsm"
+
+
+def deletePythonFiles():
+    remove('trans.py')        # удаляем сгенерированные файлы
+    remove('transpep.py')
+    remove('newcur.py')
+
+
+def DeleteAll():
+    remove('z3_funcs.py')
+    for root, dirs, files in os.walk('here', topdown=False):
+        for name in files:
+            os.remove(os.path.join(root, name))
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))
+    os.rmdir('here')
+
+
+def deleteVBA():
+    remove('code.txt')
+
+
+def takeVBA(pathfrom, pathto):
+    with ZipFile(pathfrom, 'r') as zipObj:
+        zipObj.extractall('here')
+
+    pathfrom = './here/xl/vbaProject.bin'
+    python3_command = "python2 ./oledump/oledump.py -f " + pathfrom + " -t " + pathto + ""  # launch your python2 script using bash
+    subprocess.run(python3_command.split())
 
 
 def GetParamsArray(info):
@@ -31,16 +63,18 @@ def getValue(model, param):
             return i.split(' = ')[1].strip('"')
 
 
+def getHyperStateZ3(model, info):
+    return GetHyperState(*[int(getValue(model, 'x_' + str(i) + '_int')) for i in range(info[0], info[0] * 2)])
+
+
 def UpdateConnections(graph):
     arr = GetParamsArray(info)
     count = 0
     s = Solver()
-    find = String('find')
     add = arr[info[0] * 2:]
     current = arr[0:info[0]]
     s.add(z3_funcs.IsPossible(*current, *add))
     s.add([z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:])[i] == arr[info[0] + i] for i in range(info[0])])
-    s.add(find == z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]))
     for node in graph.keys():
         flag = True
         while flag:
@@ -50,7 +84,7 @@ def UpdateConnections(graph):
                 s.add(z3_funcs.GetHyperState(*arr[info[0]:info[0] * 2]) != StringVal(node2))
             if s.check() == sat:
                 model = str(s.model())
-                graph[node].add(getValue(model, 'find'))
+                graph[node].add(getHyperStateZ3(model, info))
             else:
                 flag = False
             s.pop()
@@ -92,6 +126,7 @@ def UpdateNodes(graph):
 def updateGraph(graph):
     arr = GetParamsArray(info)
     q = Queue()
+    all_nodes = set(graph.keys())
     for i in graph.keys():
         q.put(i)
     s = Solver()
@@ -101,21 +136,24 @@ def updateGraph(graph):
     s.add(z3_funcs.IsPossible(*current, *add))
     s.add(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
     while not q.empty():
+        s.push()
         node = q.queue[0]
-        cond = []
-        cond += [find != StringVal(name) for name in graph.keys()]
-        cond.append(z3_funcs.GetHyperState(*current) == StringVal(node))
-        s.add(cond)
+        s.add([find != StringVal(name) for name in graph[node]])
+        s.add(z3_funcs.GetHyperState(*current) == StringVal(node))
         if s.check() == sat:
             m = s.model()
             newval = getValue(m, 'find')
-            graph[newval] = set()
+            if newval not in all_nodes:
+                graph[newval] = set()
+                all_nodes.add(newval)
+                print("Now there are " + str(len(all_nodes)) + " nodes")
             graph[node].add(newval)
             q.put(newval)
-            print("Now there are " + str(len(graph.keys())) + " nodes")
         else:
             print("All nodes connected with " + node + " found")
             q.get()
+        s.pop()
+    return graph
 
 
 def GenerateFile():
@@ -407,8 +445,14 @@ def printGraph(graph):
         print(str(i) + ": " + str(graph[i]))
 
 
+########################################################################################################################
+
+
+takeVBA(openfile, 'code.txt')
 
 translate("code.txt") # переводим код, он записывается в transpep
+
+deleteVBA()
 
 import transpep
 from transpep import * # импортируем файл
@@ -426,12 +470,6 @@ GenerateFile()
 
 from newcur import NextCurrent
 
-#graph = BuildIntGraph(100000)
-
-#for con in graph.keys():
-#    graph[con] = list(set(graph[con]))
-
-
 connections = BuildGraph(amount_of_tests)
 
 print('\n\n\n')
@@ -439,34 +477,6 @@ print('\n\n\n')
 printGraph(connections)
 
 res.close()
-#remove('trans.py')        # удаляем сгенерированные файлы
-#remove('transpep.py')
-#remove('newcur.py')
-
-nodes = set(connections.keys())
-
-'''
-
-print("\n\nNode way:")
-way = FindNodeWay(connections)
-print(way)
-
-print('\nInstructions: ')
-
-answer = GetInstruction(way)
-
-for i in answer:
-    print(i)
-
-print('\n\nEuler:\n\n')
-
-
-
-ans = FindConnectionWay(connections)
-for i in ans:
-    print(i)
-'''
-#print(FindConnectionWay(connections))
 
 print("HAPPYEND!!!!")
 
@@ -478,12 +488,17 @@ from Z3Translator import create_z3
 
 create_z3()
 
+deletePythonFiles()
+
 import z3_funcs
 
 t = time()
 connections = UpdateNodes(connections)
 print('\n\nSpent time for nodes: ' + str(int(time() - t)))
 connections = UpdateConnections(connections)
+
+DeleteAll()
+
 print('\n\nSpent time for all: ' + str(int(time() - t)))
 
 print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
@@ -498,19 +513,7 @@ for node in connections.keys():
     for node2 in connections[node]:
         G.add_edge(node, node2)
 
-nx.draw(G, with_labels=True, font_weight='bold')
+
+nx.draw(G, font_weight='bold', with_labels=True)
 
 plt.show()
-
-'''
-print("\n\nNode way:")
-way = FindNodeWay(connections)
-print(way)
-
-print('\nInstructions: ')
-
-answer = GetInstruction(way)
-
-for i in answer:
-    print(i)
-'''
