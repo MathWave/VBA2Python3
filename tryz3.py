@@ -1,12 +1,13 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+from z3 import *
 
-G=nx.DiGraph()
+s = Solver()
+arr = []
+for i in range(100):
+    arr.append(Int('x' + str(i)))
+s.add(x)
+s.check()
+print(s.model())
 
-G.add_node(1)
-
-G.add_node(2)
-G.add_edge(1,2)
-nx.draw(G)
-plt.show()

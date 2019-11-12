@@ -13,8 +13,8 @@ from xlwt import Workbook
 
 ###################################### MAIN CONTROLLERS ################################################################
 
-amount_of_tests = 1
-openfile = "models/book2x1.xlsm"
+amount_of_tests = 10000
+openfile = "models/book3x2.xlsm"
 saveto = "results.xls"
 
 ########################################################################################################################
@@ -54,6 +54,10 @@ def getValue(model, param):
     for i in values:
         if i.__contains__(param):
             return i.split(' = ')[1].strip('"')
+    num = int(param.split('_')[1])
+    return choice(info[num + 2 - 2 * info[0]])
+
+
 
 
 def getHyperStateZ3(model, info):
@@ -65,11 +69,20 @@ def GetParamsArray(info):
     for i in range(2 * info[0]):
         arr.append(Int('x_' + str(i) + '_int'))
     for i in range(info[1]):
-        if (type(info[2 + i][0]) is int):
-            arr.append(Int('x_' + str(info[0] * 2 + i + 2) + '_int'))
+        if type(info[2 + i][0]) is int:
+            arr.append(Int('x_' + str(info[0] * 2 + i) + '_int'))
         else:
-            arr.append(String('x_' + str(info[0] * 2 + i + 2) + '_str'))
+            arr.append(String('x_' + str(info[0] * 2 + i) + '_str'))
     return arr
+
+
+def GetNewTouple(model, info):
+    arr = GetParamsArray(info)
+    newarr = []
+    for i in arr:
+        newarr.append(getValue(model, str(i)))
+    return [PrintArr(newarr[0:info[0]]), PrintArr(newarr[info[0]*2:]), PrintArr(newarr[info[0]:info[0]*2])]
+
 
 
 def UpdateConnections(graph):
@@ -90,6 +103,7 @@ def UpdateConnections(graph):
             if s.check() == sat:
                 model = str(s.model())
                 graph[node].add(getHyperStateZ3(model, info))
+                examples.append(GetNewTouple(model, info))
             else:
                 flag = False
             s.pop()
@@ -105,19 +119,22 @@ def UpdateNodes(graph):
         q.put(i)
     s = Solver()
     current = arr[0:info[0]]
+    nextcur = arr[info[0]:info[0] * 2]
     add = arr[info[0] * 2:]
     find = String('find')
     s.add(z3_funcs.IsPossible(*current, *add))
     s.add(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
+    s.add(find == z3_funcs.GetHyperState(*nextcur))
     while not q.empty():
         s.push()
         node = q.queue[0]
         s.add([find != StringVal(name) for name in graph.keys()])
         s.add(z3_funcs.GetHyperState(*current) == StringVal(node))
         if s.check() == sat:
-            m = s.model()
+            m = str(s.model())
             newval = getValue(m, 'find')
             graph[newval] = set()
+            examples.append(GetNewTouple(m, info))
             graph[node].add(newval)
             q.put(newval)
             print("Now there are " + str(len(graph.keys())) + " nodes")
@@ -149,7 +166,7 @@ def PrintArr(arr): # вывод массива
     line = ''
     for i in arr:
         line += str(i) + ' '
-    return line
+    return line[0:len(line)-1]
 
 
 def BuildGraph(n, wb):
@@ -170,10 +187,14 @@ def BuildGraph(n, wb):
                 data.append(choice(j))
             if IsPossible(*current, *data):
                 break
+        cur_hyper = GetHyperState(*current)
         nextcurrent = NextCurrent(current, data)  # получаем следующее значение в ячейках
-        if GetHyperState(*current) not in list(connections.keys()):  # если позиция ячеек еще не встречалась, добавляем
-            connections[GetHyperState(*current)] = set()  # ее в словарь
-        connections[GetHyperState(*current)].add(GetHyperState(*nextcurrent))  # добавляем связь
+        next_hyper = GetHyperState(*nextcurrent)
+        if cur_hyper not in list(connections.keys()):  # если позиция ячеек еще не встречалась, добавляем
+            connections[cur_hyper] = set()  # ее в словарь
+        if next_hyper not in connections[cur_hyper]:
+            connections[cur_hyper].add(next_hyper)  # добавляем связь
+            examples.append([PrintArr(current), PrintArr(data), PrintArr(nextcurrent)])
         if i < 65535:
             rnd.write(i + 1, 0, i + 1)
             rnd.write(i + 1, 1, PrintArr(current))
@@ -204,20 +225,34 @@ def connections_amount(graph):
 
 
 def printGraph(graph, wb):
-    # rnd = wb.add_sheet('Graph of Hyperstates')
-    # rnd.write(0, 0, 'Node')
-    # rnd.write(0, 1, 'Nexts')
-    # nodes = list(graph.keys())
-    # for i in range(len(nodes)):
-    #     rnd.write(i + 2)
+    rnd = wb.add_sheet('Graph of Hyperstates')
+    rnd.write(0, 0, 'Node')
+    rnd.write(0, 1, 'Nexts')
+    nodes = list(graph.keys())
+    for i in range(len(nodes)):
+        rnd.write(i + 1, 0, nodes[i])
+        l = list(graph[nodes[i]])
+        for j in range(len(l)):
+            rnd.write(i + 1, j + 1, l[j])
     for i in graph:
         print(str(i) + ": " + str(graph[i]))
+
+
+def ExamplesOutput(wb):
+    rnd = wb.add_sheet('Instructions')
+    rnd.write(0, 0, 'Before')
+    rnd.write(0, 1, 'Add')
+    rnd.write(0, 2, 'After')
+    for i in range(len(examples)):
+        for j in range(3):
+            rnd.write(i + 1, j, examples[i][j])
 
 
 ########################################################################################################################
 
 wb = Workbook()
 
+examples = []
 
 takeVBA(openfile, 'code.txt')
 
@@ -243,7 +278,7 @@ connections = BuildGraph(amount_of_tests, wb)
 
 print('\n\n\n')
 
-printGraph(connections, wb)
+#printGraph(connections, wb)
 
 print("HAPPYEND!!!!")
 
@@ -273,6 +308,8 @@ print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(
 printGraph(connections, wb)
 
 print("HAPPYEND!!!![2]")
+
+ExamplesOutput(wb)
 
 wb.save(saveto)
 
