@@ -13,7 +13,7 @@ from xlwt import Workbook
 
 ###################################### MAIN CONTROLLERS ################################################################
 
-amount_of_tests = 100000
+amount_of_tests = 1
 openfile = "models/book2x1.xlsm"
 saveto = "results.xls"
 
@@ -47,6 +47,17 @@ def takeVBA(pathfrom, pathto):
     pathfrom = './here/xl/vbaProject.bin'
     python3_command = "python2 ./oledump/oledump.py -f " + pathfrom + " -t " + pathto + ""  # launch your python2 script using bash
     subprocess.run(python3_command.split())
+
+
+def getValue(model, param):
+    values = str(model).replace('[', '').replace(']', '').split(',\n')
+    for i in values:
+        if i.__contains__(param):
+            return i.split(' = ')[1].strip('"')
+
+
+def getHyperStateZ3(model, info):
+    return GetHyperState(*[int(getValue(model, 'x_' + str(i) + '_int')) for i in range(info[0], info[0] * 2)])
 
 
 def GetParamsArray(info):
@@ -193,12 +204,12 @@ def connections_amount(graph):
 
 
 def printGraph(graph, wb):
-    rnd = wb.add_sheet('Graph of Hyperstates')
-    rnd.write(0, 0, 'Node')
-    rnd.write(0, 1, 'Nexts')
-    nodes = list(graph.keys())
-    for i in range(len(nodes)):
-        rnd.write(i + 2)
+    # rnd = wb.add_sheet('Graph of Hyperstates')
+    # rnd.write(0, 0, 'Node')
+    # rnd.write(0, 1, 'Nexts')
+    # nodes = list(graph.keys())
+    # for i in range(len(nodes)):
+    #     rnd.write(i + 2)
     for i in graph:
         print(str(i) + ": " + str(graph[i]))
 
@@ -232,7 +243,7 @@ connections = BuildGraph(amount_of_tests, wb)
 
 print('\n\n\n')
 
-printGraph(connections)
+printGraph(connections, wb)
 
 print("HAPPYEND!!!!")
 
@@ -259,7 +270,7 @@ print('\n\nSpent time for all: ' + str(int(time() - t)))
 
 print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
 
-printGraph(connections)
+printGraph(connections, wb)
 
 print("HAPPYEND!!!![2]")
 
