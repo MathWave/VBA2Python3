@@ -6,6 +6,7 @@ from z3 import *
 from time import time
 import networkx as nx
 import matplotlib.pyplot as plt
+import argparse
 from zipfile import ZipFile
 import subprocess
 import os
@@ -14,10 +15,20 @@ from xlwt import Workbook
 ###################################### MAIN CONTROLLERS ################################################################
 
 amount_of_tests = 10000
-openfile = "models/book3x2.xlsm"
-saveto = "results.xls"
+openfile = sys.argv[1]
+saveto = sys.argv[2] + '/' + sys.argv[3]
+
+print(openfile)
+print(saveto)
 
 ########################################################################################################################
+
+
+def CreateParser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--')  #создаем парсер input-dir
+    parser.add_argument('--model') #создаем парсер model
+    return parser
 
 
 def deletePythonFiles():
@@ -203,7 +214,7 @@ def BuildGraph(n, wb):
             rnd.write(i + 1, 4, PrintArr(nextcurrent))
             rnd.write(i + 1, 5, GetHyperState(*nextcurrent))
         current = nextcurrent
-        print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + GetHyperState(*current) + '\t\t' + PrintArr(current))
+        #print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + GetHyperState(*current) + '\t\t' + PrintArr(current))
         res.write('"' + str(i + 1) + '";"' + PrintArr(data) + '";"' + GetHyperState(*current) + '";"' + PrintArr(
             current) + '"\n')
         # выводим результат в консоль и записываем в csv
@@ -313,12 +324,12 @@ ExamplesOutput(wb)
 
 wb.save(saveto)
 
-G = nx.DiGraph()
-
-for node in connections.keys():
-    for node2 in connections[node]:
-        G.add_edge(node, node2)
-
-nx.draw(G, font_weight='bold', with_labels=True)
-
-plt.show()
+# G = nx.DiGraph()
+#
+# for node in connections.keys():
+#     for node2 in connections[node]:
+#         G.add_edge(node, node2)
+#
+# nx.draw(G, font_weight='bold', with_labels=False, width=0.5)
+#
+# plt.show()
