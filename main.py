@@ -148,10 +148,22 @@ def UpdateNodes(graph):
             print("All nodes connected with " + node + " found")
             q.get()
         s.pop()
-        # if area:
-        #     s.push()
-        #     s.add(z3_funcs.GetHyperState(*current) == StringVal(node))
-        #     get = String('get')
+        if area:
+            s.push()
+            s.add(z3_funcs.GetHyperState(*nextcur) == StringVal(node))
+            get = String('get')
+            s.add(get == z3_funcs.GetHyperState(*current))
+            s.add([get != StringVal(line) for line in graph.keys()])
+            if s.check() == sat:
+                m = str(s.model())
+                newval = getValue(m, 'get')
+                graph[newval] = set()
+                graph[newval].add(getValue(m, 'find'))
+                examples.append(GetNewTouple(m, info))
+                q.put(newval)
+                print("Now there are " + str(len(graph.keys())) + " nodes")
+            s.pop()
+
 
     return graph
 
