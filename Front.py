@@ -3,6 +3,8 @@ import os
 from time import sleep
 from threading import Thread
 from tkinter import filedialog
+from tkinter import messagebox as mb
+from os import remove
 
 
 root = Tk()
@@ -21,9 +23,12 @@ entry_output.place(x=60, y=57)
 entry_file = Entry(root)
 entry_file.place(x=60, y=87)
 
+entry_amount = Entry(root)
+entry_amount.place(x = 60, y=117)
+
 run = Button(root, text="Run!")
 run.bind('<Button-1>', lambda event: Run())
-run.place(x=120, y=150)
+run.place(x=120, y=200)
 
 label_input = Label(root, text="Model:")
 label_input.place(x=10, y=30)
@@ -41,6 +46,18 @@ choose_output.bind('<Button-1>', lambda event: outputfile())
 
 label_filename = Label(root, text="File:")
 label_filename.place(x=26, y=90)
+
+label_amount = Label(root, text='Tests:')
+label_amount.place(x=13, y=120)
+
+area = False
+check1 = Checkbutton(root, text='Area of visibility', onvalue=True, offvalue=False)
+check1.place(x=60, y=150)
+check1.bind('<Button-1>', lambda event: change())
+
+def change():
+    global area
+    area = bool(1 - int(area))
 
 
 
@@ -70,7 +87,14 @@ def Run():
     full = os.path.abspath('main.py')
     full = full[0:len(full) - 7]
     os.system('cd ' + full)
-    os.system('python3 main.py' + ' ' + entry_input.get() + ' ' + entry_output.get() + ' ' + entry_file.get() + '.xls')
+    code = os.system('python3 main.py' + ' fill ' + entry_input.get() + ' ' + entry_output.get() + ' ' +
+                     entry_file.get() + '.xls' + ' ' + entry_amount.get() + ' ' + str(area))
+    if code == 0:
+        mb.showinfo('Success', 'Success')
+    else:
+        log = open('logs.txt').read()
+        remove('logs.txt')
+        mb.showinfo('ERROR', log)
     enable()
 
 

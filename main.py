@@ -6,7 +6,6 @@ from z3 import *
 from time import time
 import networkx as nx
 import matplotlib.pyplot as plt
-import argparse
 from zipfile import ZipFile
 import subprocess
 import os
@@ -14,22 +13,18 @@ from xlwt import Workbook
 
 ###################################### MAIN CONTROLLERS ################################################################
 
-amount_of_tests = 10000
-openfile = sys.argv[1]
-saveto = sys.argv[2] + '/' + sys.argv[3]
-
-print(openfile)
-print(saveto)
+try:
+    openfile = sys.argv[2]
+    saveto = sys.argv[3] + '/' + sys.argv[4]
+    amount_of_tests = int(sys.argv[5])
+    area = True if sys.argv[6] == 'True' else False
+except:
+    log = open('logs.txt', 'w')
+    log.write("Error in input information!")
+    log.close()
+    exit(1)
 
 ########################################################################################################################
-
-
-def CreateParser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--')  #создаем парсер input-dir
-    parser.add_argument('--model') #создаем парсер model
-    return parser
-
 
 def deletePythonFiles():
     remove('trans.py')        # удаляем сгенерированные файлы
@@ -54,7 +49,6 @@ def deleteVBA():
 def takeVBA(pathfrom, pathto):
     with ZipFile(pathfrom, 'r') as zipObj:
         zipObj.extractall('here')
-
     pathfrom = './here/xl/vbaProject.bin'
     python3_command = "python2 ./oledump/oledump.py -f " + pathfrom + " -t " + pathto + ""  # launch your python2 script using bash
     subprocess.run(python3_command.split())
@@ -134,7 +128,7 @@ def UpdateNodes(graph):
     add = arr[info[0] * 2:]
     find = String('find')
     s.add(z3_funcs.IsPossible(*current, *add))
-    s.add(z3_funcs.GetHyperState(*z3_funcs.NextCurrent(current, add)) == find)
+    s.add([z3_funcs.NextCurrent(arr[0:info[0]], arr[info[0] * 2:])[i] == arr[info[0] + i] for i in range(info[0])])
     s.add(find == z3_funcs.GetHyperState(*nextcur))
     while not q.empty():
         s.push()
@@ -149,10 +143,16 @@ def UpdateNodes(graph):
             graph[node].add(newval)
             q.put(newval)
             print("Now there are " + str(len(graph.keys())) + " nodes")
+
         else:
             print("All nodes connected with " + node + " found")
             q.get()
         s.pop()
+        # if area:
+        #     s.push()
+        #     s.add(z3_funcs.GetHyperState(*current) == StringVal(node))
+        #     get = String('get')
+
     return graph
 
 
@@ -214,7 +214,7 @@ def BuildGraph(n, wb):
             rnd.write(i + 1, 4, PrintArr(nextcurrent))
             rnd.write(i + 1, 5, GetHyperState(*nextcurrent))
         current = nextcurrent
-        #print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + GetHyperState(*current) + '\t\t' + PrintArr(current))
+        print(str(i + 1) + ": " + PrintArr(data) + '\t\t' + GetHyperState(*current) + '\t\t' + PrintArr(current))
         res.write('"' + str(i + 1) + '";"' + PrintArr(data) + '";"' + GetHyperState(*current) + '";"' + PrintArr(
             current) + '"\n')
         # выводим результат в консоль и записываем в csv
@@ -245,8 +245,8 @@ def printGraph(graph, wb):
         l = list(graph[nodes[i]])
         for j in range(len(l)):
             rnd.write(i + 1, j + 1, l[j])
-    for i in graph:
-        print(str(i) + ": " + str(graph[i]))
+    # for i in graph:
+    #     print(str(i) + ": " + str(graph[i]))
 
 
 def ExamplesOutput(wb):
@@ -261,75 +261,82 @@ def ExamplesOutput(wb):
 
 ########################################################################################################################
 
-wb = Workbook()
+try:
+    wb = Workbook()
 
-examples = []
+    examples = []
 
-takeVBA(openfile, 'code.txt')
+    takeVBA(openfile, 'code.txt')
 
-translate("code.txt") # переводим код, он записывается в transpep
+    translate("code.txt") # переводим код, он записывается в transpep
 
-deleteVBA()
+    deleteVBA()
 
-import transpep
-from transpep import * # импортируем файл
+    import transpep
+    from transpep import * # импортируем файл
 
-info = GetInfo() # информация по обрабатываемым функциям
+    info = GetInfo() # информация по обрабатываемым функциям
 
-more_info = []
-for i in range(info[1] + 2):
-    more_info.append(info[i])
-more_info = more_info[2:]
+    more_info = []
+    for i in range(info[1] + 2):
+        more_info.append(info[i])
+    more_info = more_info[2:]
 
-GenerateFile()
+    GenerateFile()
 
-from newcur import NextCurrent
+    from newcur import NextCurrent
 
-connections = BuildGraph(amount_of_tests, wb)
+    connections = BuildGraph(amount_of_tests, wb)
 
-print('\n\n\n')
+    #print('\n\n\n')
 
-#printGraph(connections, wb)
+    #printGraph(connections, wb)
 
-print("HAPPYEND!!!!")
+    # print("HAPPYEND!!!!")
+    #
+    # print("\n\nIn current graph:\n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
+    #
+    # print("Updating...\n\n")
 
-print("\n\nIn current graph:\n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
+    from Z3Translator import create_z3
 
-print("Updating...\n\n")
+    create_z3()
 
-from Z3Translator import create_z3
+    deletePythonFiles()
 
-create_z3()
+    import z3_funcs
 
-deletePythonFiles()
+    t = time()
+    connections = UpdateNodes(connections)
+    #print('\n\nSpent time for nodes: ' + str(int(time() - t)))
+    connections = UpdateConnections(connections)
 
-import z3_funcs
+    DeleteAll()
 
-t = time()
-connections = UpdateNodes(connections)
-print('\n\nSpent time for nodes: ' + str(int(time() - t)))
-connections = UpdateConnections(connections)
+    print('\n\nSpent time for all: ' + str(int(time() - t)))
 
-DeleteAll()
+    print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
 
-print('\n\nSpent time for all: ' + str(int(time() - t)))
+    printGraph(connections, wb)
 
-print("\n\nNow there are \n" + str(node_amount(connections)) + " nodes\n" + str(connections_amount(connections)) + " connections\n\n")
+    #print("HAPPYEND!!!![2]")
 
-printGraph(connections, wb)
+    ExamplesOutput(wb)
 
-print("HAPPYEND!!!![2]")
+    wb.save(saveto)
 
-ExamplesOutput(wb)
+    # G = nx.DiGraph()
+    #
+    # for node in connections.keys():
+    #     for node2 in connections[node]:
+    #         G.add_edge(node, node2)
+    #
+    # nx.draw(G, font_weight='bold', with_labels=False, width=0.5)
+    #
+    # plt.show()
 
-wb.save(saveto)
-
-# G = nx.DiGraph()
-#
-# for node in connections.keys():
-#     for node2 in connections[node]:
-#         G.add_edge(node, node2)
-#
-# nx.draw(G, font_weight='bold', with_labels=False, width=0.5)
-#
-# plt.show()
+except Exception as e:
+    log = open('logs.txt', 'w')
+    log.write(str(e))
+    log.close()
+    exit(1)
